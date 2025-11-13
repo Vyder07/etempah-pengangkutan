@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Log Masuk Admin</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('../../../IMG/background.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      background: rgba(0, 0, 0, 0.389);
+      backdrop-filter: blur(1px);
+      padding: 30px;
+      width: 320px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .login-box h2 {
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .login-box input[type="text"],
+    .login-box input[type="password"] {
+      width: 100%;
+      margin-bottom: 24px;
+      padding: 12px 15px;
+      border: 1px solid #0bf3ff;
+      border-radius: 8px;
+      background-color: #ffffff;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9em;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .options a {
+      color: #10dbff;
+      text-decoration: none;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4dbeff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-box button:hover {
+      background-color: #1a45df;
+    }
+
+    .signup-text {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: white;
+    }
+
+    .signup-text a {
+      color: #07a4ff;
+      text-decoration: none;
+    }
+
+    #login-msg {
+      margin-top: 12px;
+      font-size: 0.9em;
+      color: #ff8080;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Log Masuk Admin</h2>
+
+    <form id="login-form">
+      <input type="text" id="email" placeholder="Email Address" required />
+      <input type="password" id="password" placeholder="Password" required />
+
+      <div class="options">
+        <label>
+          <input type="checkbox" /> Ingat Saya
+        </label>
+        <a href="forgot.html">Terlupa Kata Laluan?</a>
+      </div>
+
+      <button type="submit">Log Masuk</button>
+
+      <p class="signup-text">
+        Belum mempunyai akaun? <a href="register.html">Daftar.</a>
+      </p>
+
+      <div id="login-msg"></div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('login-msg');
+      msg.textContent = '';
+
+      if(!email || !password){
+        msg.textContent = 'Sila masukkan email dan kata laluan.';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+
+        // Semak status HTTP
+        if (!res.ok) {
+          msg.textContent = 'Server error: ' + res.status;
+          return;
+        }
+
+        const body = await res.json();
+
+        if(body.success){
+          if(body.role && body.role === 'admin'){
+            window.location.href = '../main/dashboard.html';
+          } else {
+            msg.textContent = 'Akaun ini bukan admin.';
+          }
+        } else {
+          msg.textContent = body.message || 'Log masuk gagal.';
+        }
+
+      } catch(err){
+        console.error(err);
+        msg.textContent = 'Ralat rangkaian. Sila cuba lagi.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Staf</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body {
+      min-height: 100vh; width: 100%;
+      background-image: url('/IMG/Car1.jpg');
+      background-position: center;
+      background-size: cover;
+      display: flex; justify-content: flex-end; align-items: center;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: 260px; height: 100%;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(17px);
+      border-right:1px solid rgba(255,255,255,0.7);
+      display:flex;flex-direction:column;padding:20px 0; z-index:0;
+    }
+    .logo{display:flex;align-items:center;padding:0 20px;color:#000;}
+    .logo img{width:43px;border-radius:50%;}
+    .logo h2{font-size:1.15rem;font-weight:600;margin-left:15px;}
+    .links{list-style:none;padding:0 8px;}
+    .links li{display:flex;align-items:center;border-radius:4px;padding:10px;transition:background .3s;}
+    .links li:hover{background:rgba(0,0,0,0.05);cursor:pointer;}
+    .links li span{padding-right:10px;font-size:24px;color:#000;}
+    .links li a{text-decoration:none;color:#000;font-weight:500;white-space:nowrap;}
+    .links li.active{background:#0a4c9a;border-left:4px solid #fff;}
+    .links li.active a, .links li.active span{color:#fff;font-weight:600;}
+    .bottom-links{margin-top:auto;}
+
+    /* Kotak utama */
+    .kotak {
+      max-width:1200px;
+      width: calc(100% - 340px);
+      min-height:520px;
+      background: rgb(251,252,255);
+      border:4px solid #fff; border-radius:20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      display:flex;flex-direction:column;align-items:center;padding:20px;
+      margin:60px auto; opacity:0.95; margin-left:300px; position:relative; overflow:hidden; z-index:2;
+    }
+
+    /* Banner (read-only) */
+    .banner-container {
+      position: relative; width:100%; height:320px; overflow:hidden; border-radius:12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15); background:#d1d5db; display:flex;justify-content:center;align-items:center;
+    }
+    .banner-container img { width:100%; height:100%; object-fit:cover; filter:brightness(0.85); }
+    .banner-text {
+      position:absolute; bottom:20px; left:30px; color:#fff;
+      text-shadow:0 2px 6px rgba(0,0,0,0.5);
+    }
+    .banner-text h2{ margin:0; font-size:1.8em; font-weight:600; }
+    .banner-text p{ margin-top:6px; font-size:1em; opacity:0.95; }
+
+    .event-details { margin-top:15px; text-align:center; color:#333; font-size:1.05rem; }
+    .event-details span{ font-weight:600; }
+
+    /* Logout modal */
+    .modal {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;
+    }
+    .modal-panel {
+      position: relative; background: #fff; border-radius: 10px; padding: 18px 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15); max-width:360px; width:90%; z-index:1; text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="../../../IMG/PROTON.png" alt="logo">
+      <h2>Staf</h2>
+    </div>
+    <ul class="links main-links">
+      <li class="active"><span class="material-symbols-outlined">dashboard</span><a href="#">Laman Utama</a></li>
+      <li><span class="material-symbols-outlined"> car_rental </span><a href="booking.html">Tempahan</a></li>
+      <li><span class="material-symbols-outlined">notifications</span><a href="notification.html">Notifikasi</a></li>
+      <li><span class="material-symbols-outlined">history</span><a href="documents.html">Sejarah Tempahan</a></li>
+    </ul>
+    <ul class="links bottom-links">
+      <li><span class="material-symbols-outlined">person</span><a href="profile.html">Profil</a></li>
+      <li class="logout-link"><span class="material-symbols-outlined">logout</span><a href="#">Log Keluar</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="kotak">
+    <div class="banner-container">
+      <img src="https://via.placeholder.com/900x300?text=Tiada+Event+Terbaharu" alt="Event Banner" />
+      <div class="banner-text">
+        <h2>Tiada Event Terbaharu</h2>
+        <p>Nantikan kemas kini akan datang daripada pihak pentadbir.</p>
+      </div>
+    </div>
+
+    <div class="event-details">
+      <p>Maklumat akan dikemas kini secara automatik apabila pentadbir menambah event baharu.</p>
+    </div>
+  </div>
+
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="modal" aria-hidden="true">
+    <div class="modal-panel">
+      <h3>Sahkan Log Keluar</h3>
+      <p>Adakah anda pasti mahu log keluar?</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+        <button id="confirmLogout">Ya, Log Keluar</button>
+        <button id="cancelLogout">Tidak</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Logout modal script (same as admin)
+    const logoutLink = document.querySelector('.logout-link a');
+    const modal = document.getElementById('logoutModal');
+    const confirmBtn = document.getElementById('confirmLogout');
+    const cancelBtn = document.getElementById('cancelLogout');
+
+    logoutLink.addEventListener('click', e => {
+      e.preventDefault();
+      modal.style.display = 'flex';
+    });
+    confirmBtn.addEventListener('click', () => window.location.href = 'logout.html');
+    cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+  </script>
+</body>
+</html>

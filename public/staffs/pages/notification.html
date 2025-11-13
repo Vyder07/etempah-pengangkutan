@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notifikasi Staf</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+  <!-- topbar -->
+  <header class="topbar">
+    <div class="search-wrap">
+      <input id="globalSearch" class="search-input" type="search" placeholder="Cari notifikasi..." aria-label="Search">
+      <button class="search-btn" type="button" onclick="globalSearch()">Cari</button>
+    </div>
+  </header>
+  <style>
+  .topbar{position:fixed;left:260px;right:0;top:0;height:64px;display:flex;align-items:center;padding:0 18px;background:transparent;z-index:999}
+  .search-wrap{max-width:1100px;width:100%;display:flex;gap:8px;background:#ffffff;padding:8px;border-radius:8px}
+  .search-input{flex:1;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;background:#fff}
+  .search-btn{padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#0b63ff;color:#fff;cursor:pointer}
+  .kotak,.content,main{margin-top:84px}
+  @media(max-width:800px){.topbar{left:0} .kotak,.content,main{margin-left:0}}
+  </style>
+
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="../../../IMG/PROTON.png" alt="logo">
+      <h2>Staf</h2>
+    </div>
+
+    <ul class="links main-links">
+      <li>
+        <span class="material-symbols-outlined">dashboard</span>
+        <a href="dashboard.html">Laman Utama</a>
+      </li>
+      <li>
+       <span class="material-symbols-outlined"> car_rental </span>
+        <a href="Booking.html">Tempahan</a>
+      </li>
+      <li class="active">
+        <span class="material-symbols-outlined">notifications</span>
+        <a href="/staff/pages/main/notification.html">Notifikasi</a>
+      </li>
+      <li><span class="material-symbols-outlined">history</span><a href="history.html">Sejarah Tempahan</a></li>
+    </ul>
+    </ul>
+
+    <ul class="links bottom-links">
+      <li>
+        <span class="material-symbols-outlined">person</span>
+        <a href="/staff/pages/main/bottom/profile.html">Profil</a>
+      </li>
+      <li class="logout-link">
+        <span class="material-symbols-outlined">logout</span>
+        <a href="/staff/pages/main/bottom/logout.html">Log Keluar</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- main content -->
+  <main class="content ml-[260px] p-6">
+    <div class="bg-white shadow-lg rounded-xl p-6 w-full">
+      <h2 class="text-xl font-bold mb-4">Status Permohonan Saya</h2>
+
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b">
+            <th class="py-2 text-left">Tarikh Permohonan</th>
+            <th class="py-2 text-left">Jenis Kenderaan</th>
+            <th class="py-2 text-left">Status</th>
+            <th class="py-2 text-center">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b">
+            <td>2025-10-23</td>
+            <td>Van Kolej</td>
+            <td class="text-green-600 font-semibold">DILULUSKAN</td>
+            <td class="text-center">
+              <button onclick="openModal('2025-10-23','Van Kolej','Memo lawatan pelajar','Permohonan diluluskan oleh pentadbiran untuk lawatan ke Kilang Honda Alor Gajah.','BPPL')" class="text-blue-600 hover:text-blue-800">👁</button>
+            </td>
+          </tr>
+          <tr class="border-b">
+            <td>2025-09-29</td>
+            <td>Kereta Proton</td>
+            <td class="text-red-600 font-semibold">DITOLAK</td>
+            <td class="text-center">
+              <button onclick="openModal('2025-09-29','Kereta Proton','Memo projek pelajar','Permohonan ditolak kerana jadual bertembung dengan penggunaan kenderaan lain.','HEA')" class="text-blue-600 hover:text-blue-800">👁</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- modal view -->
+  <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-white rounded-lg p-6 w-[600px] relative">
+      <button onclick="closeModal()" class="absolute top-2 right-2 text-xl font-bold text-black">✕</button>
+
+      <h3 class="text-lg font-bold mb-4">Maklumat Permohonan</h3>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="font-bold">Bahagian:</label>
+          <input id="modalBahagian" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
+        </div>
+        <div>
+          <label class="font-bold">Tarikh:</label>
+          <input id="modalTarikh" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
+        </div>
+        <div>
+          <label class="font-bold">Kenderaan:</label>
+          <input id="modalKenderaan" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
+        </div>
+        <div class="col-span-2">
+          <label class="font-bold">Memo:</label>
+          <div class="flex items-center gap-2 bg-gray-50 border rounded px-2 py-1">
+            <span id="modalMemo" class="flex-1 text-gray-700 select-none">-</span>
+            <a id="memoDownload" href="#" download="memo.pdf" class="text-blue-600 hover:text-blue-800">⬇</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="font-bold">Maklumat:</label>
+        <textarea id="modalMaklumat" class="w-full border rounded px-2 py-2 bg-gray-50 cursor-default" rows="4" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    body {
+      height: 100vh;
+      width: 100%;
+      background-image: url('/IMG/Car2.jpg');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      font-family: "Poppins", sans-serif;
+    }
+    .sidebar {
+      position: fixed;top:0;left:0;width:260px;height:100%;
+      background: rgba(255,255,255,0.2);backdrop-filter:blur(17px);
+      border-right:1px solid rgba(255,255,255,0.7);
+      display:flex;flex-direction:column;padding:20px 0;
+    }
+    .logo {display:flex;align-items:center;padding:0 20px;color:#000}
+    .logo img{width:43px;border-radius:50%}
+    .logo h2{font-size:1.15rem;font-weight:600;margin-left:15px}
+    .links{list-style:none;padding:0 8px}
+    .links li{display:flex;align-items:center;border-radius:4px;transition:background 0.3s;padding:10px}
+    .links li:hover{cursor:pointer;background:rgba(0,0,0,0.05)}
+    .links li span{padding-right:10px;font-size:24px;color:#000}
+    .links li a{color:#000;text-decoration:none;font-weight:500;white-space:nowrap}
+    .links li.active{background:#0734bb !important;border-left:4px solid #fff}
+    .links li.active a,.links li.active span{color:#fff !important;font-weight:600}
+    .bottom-links{margin-top:auto}
+  </style>
+
+  <script>
+    function openModal(tarikh, kenderaan, memo, maklumat, bahagian) {
+      document.getElementById('detailModal').classList.remove('hidden');
+      document.getElementById('modalTarikh').value = tarikh;
+      document.getElementById('modalKenderaan').value = kenderaan;
+      document.getElementById('modalMemo').innerText = memo;
+      document.getElementById('modalMaklumat').value = maklumat;
+      document.getElementById('modalBahagian').value = bahagian;
+      document.getElementById('memoDownload').href = "data:application/pdf;base64,JVBERi0xLjQKJc...";
+    }
+
+    function closeModal(){
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

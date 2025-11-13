@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sejarah Tempahan</title>
+
+  <!-- Material Symbols for the icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+  <style>
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+  background-image: url('/IMG/Car1.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(17px);
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 20px 0;
+}
+
+/* Disable collapsed behavior: keep full width even if collapsed */
+.sidebar.collapsed { width: 260px; }
+
+.logo {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  color: #000;
+}
+
+.logo img {
+  width: 43px;
+  border-radius: 50%;
+}
+
+.logo h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-left: 15px;
+}
+
+/* Don't hide logo text when (previously) collapsed */
+.sidebar.collapsed .logo h2 { display: block; }
+
+/* Toggle button */
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 20px;
+  text-align: left;
+  color: #000;
+}
+
+.links {
+  list-style: none;
+  padding: 0 8px;
+}
+
+.links li {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: background 0.3s;
+  padding: 10px;
+}
+
+.links li:hover {
+  cursor: pointer;
+  background: rgba(255,255,255,0.12);
+}
+
+.links li span {
+  padding-right: 10px;
+  font-size: 24px;
+  color: #000;
+}
+
+.links li a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Ensure links are always visible */
+.sidebar.collapsed .links li a { color: #000; width: auto; overflow: visible; white-space: nowrap; }
+
+/* Hover (biar simple) */
+.links li:hover {
+  cursor: pointer;
+  background: rgba(0,0,0,0.05); /* kelabu lembut bila hover */
+}
+
+/* Active (selected) */
+.links li.active {
+  background: #0734bb !important;      /* Dark blue background */
+  border-left: 4px solid #ffffff;
+}
+
+.links li.active a,
+.links li.active span {
+  color: #fff !important;              /* White text/icon for contrast */
+  font-weight: 600;
+}
+
+
+.bottom-links {
+  margin-top: auto;
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- Global search bar (inserted) -->
+  <header class="topbar" role="banner">
+    <div class="search-wrap">
+      <input id="globalSearch" class="search-input" type="search" placeholder="Search site..." aria-label="Search">
+      <button class="search-btn" type="button" onclick="globalSearch()" aria-label="Search">Search</button>
+    </div>
+  </header>
+  <style>
+    .topbar{position:fixed;left:260px;right:0;top:0;height:64px;display:flex;align-items:center;padding:0 18px;background:transparent;backdrop-filter:none;z-index:999}
+    .search-wrap{max-width:1100px;width:100%;display:flex;gap:8px;background:#ffffff;padding:8px;border-radius:8px}
+    .search-input{flex:1;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;background:#fff}
+    .search-btn{padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#0b63ff;color:#fff;cursor:pointer}
+    .kotak,.content,main{margin-top:84px}
+    .kotak, main, .content { margin-left: 260px; }
+    @media(max-width:800px){.topbar{left:0} .kotak,.content,main{margin-left:0}}
+  </style>
+  <script>
+    function globalSearch(){
+      const q=document.getElementById('globalSearch').value.trim();
+      if(!q) return;
+      const found = document.querySelectorAll('body *:not(script):not(style)');
+      for(const el of found){
+        if(el.textContent && el.textContent.toLowerCase().includes(q.toLowerCase())){
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          el.style.outline='3px solid #ffea00';
+          setTimeout(()=>el.style.outline('',3000));
+          return;
+        }
+      }
+      alert('No results on this page.');
+    }
+  </script>
+  <aside class="sidebar">
+    <div class="logo">
+  <img src="../../IMG/PROTON.png" alt="logo" />
+      <h2>Staff</h2>
+    </div>
+
+    <!-- fixed: properly nested list -->
+    <ul class="links main-links">
+      <li>
+        <span class="material-symbols-outlined">dashboard</span>
+  <a href="/staffs/pages/dashboard.html">Laman Utama</a> <!-- changed to staff local page -->
+      </li>
+      <li>
+      <span class="material-symbols-outlined"> car_rental </span>
+  <a href="booking.html">Tempahan</a> <!-- staff Booking.html -->
+      </li>
+      <li>
+        <span class="material-symbols-outlined">notifications</span>
+        <a href="/staffs/pages/notification.html">Notifikasi</a> <!-- staff notification.html -->
+      </li>
+      <li class="active">
+       <span class="material-symbols-outlined">history</span>
+        <a href="/staffs/pages/history.html">Sejarah Tempahan</a> <!-- staff vehicle.html -->
+      </li>
+    </ul>
+
+    <ul class="links bottom-links">
+      <li>
+        <span class="material-symbols-outlined">person</span>
+        <a href="/staffs/pages/profile.html">Profil</a> <!-- staff profile -->
+      </li>
+      <li class="logout-link">
+        <span class="material-symbols-outlined">logout</span>
+        <a href="/staffs/pages/logout.html">Log Keluar</a>
+      </li>
+    </ul>
+
+  </aside>
+
+  <!-- Logout confirmation modal -->
+  <div id="logoutModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" tabindex="-1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+      <h3 id="logoutTitle">Sahkan Log Keluar</h3>
+      <p>Adakah anda pasti mahu log keluar?</p>
+      <div class="modal-actions">
+        <button id="confirmLogout" class="btn primary">Ya, Log Keluar</button>
+        <button id="cancelLogout" class="btn">Tidak</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* logout modal styles (kept local so no other files need editing) */
+    .modal { display: none; position: fixed; inset: 0; z-index: 9999; align-items: center; justify-content: center; }
+    .modal[aria-hidden="false"] { display: flex; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+    .modal-panel { position: relative; background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); max-width: 360px; width: 90%; z-index: 1; text-align: center; }
+    .modal-panel h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .modal-panel p { margin: 0 0 12px; color: #444; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+    .btn { padding: 8px 14px; border-radius: 8px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; }
+    .btn.primary { background: #0c48fe; color: #fff; border-color: #0c48fe; }
+  </style>
+
+  <script>
+    (function(){
+      const logoutLink = document.querySelector('.logout-link a');
+      if (!logoutLink) return;
+
+      const modal = document.getElementById('logoutModal');
+      const confirmBtn = document.getElementById('confirmLogout');
+      const cancelBtn = document.getElementById('cancelLogout');
+      const backdrop = modal.querySelector('.modal-backdrop');
+
+      function openModal(href){
+        modal.dataset.href = href || '';
+        modal.setAttribute('aria-hidden','false');
+        // focus confirm for keyboard users
+        confirmBtn.focus();
+      }
+
+      function closeModal(){
+        modal.setAttribute('aria-hidden','true');
+        delete modal.dataset.href;
+        logoutLink.focus();
+      }
+
+      logoutLink.addEventListener('click', function(e){
+        e.preventDefault();
+        openModal(this.getAttribute('href'));
+      });
+
+      confirmBtn.addEventListener('click', function(){
+        const href = modal.dataset.href || logoutLink.getAttribute('href');
+        if (href) {
+          // clear client-side session if needed
+          try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
+          window.location.href = href;
+        } else closeModal();
+      });
+
+      cancelBtn.addEventListener('click', closeModal);
+      backdrop.addEventListener('click', closeModal);
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') closeModal();
+      });
+    })();
+  </script>
+
+  <main class="content" style="margin-left:260px; padding:20px;">
+    <!-- page content -->
+  </main>
+</body>
+</html>

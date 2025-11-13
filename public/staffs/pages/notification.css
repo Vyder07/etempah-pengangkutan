@@ -1,0 +1,136 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+  background-image: url('/IMG/Car1.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(17px);
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 20px 0;
+}
+
+/* Kalau collapsed */
+.sidebar.collapsed {
+  width: 110px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  color: #000;
+}
+
+.logo img {
+  width: 43px;
+  border-radius: 50%;
+}
+
+.logo h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-left: 15px;
+}
+
+/* Kalau collapsed, sembunyikan text logo */
+.sidebar.collapsed .logo h2 {
+  display: none;
+}
+
+/* Toggle button */
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 20px;
+  text-align: left;
+  color: #000;
+}
+
+.links {
+  list-style: none;
+  padding: 0 8px;
+}
+
+.links li {
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: background 0.3s;
+  padding: 10px;
+}
+
+.links li:hover {
+  cursor: pointer;
+  background: #fff;
+}
+
+.links li span {
+  padding-right: 10px;
+  font-size: 24px;
+  color: #000;
+}
+
+.links li a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Kalau collapsed,*/
+.sidebar.collapsed .links li a {
+  color: transparent;
+  width: 40px;      /* or your icon width */
+  overflow: hidden;
+  white-space: nowrap;
+  transition: color 0.2s, width 0.2s;
+  pointer-events: auto; /* Ensure links are still clickable */
+}
+
+/* Hover (biar simple) */
+.links li:hover {
+  cursor: pointer;
+  background: rgba(0,0,0,0.05); /* kelabu lembut bila hover */
+}
+
+/* Active (selected) */
+.links li.active {
+  background: #0734bb !important;      /* Dark blue background */
+  border-left: 4px solid #ffffff;
+}
+
+.links li.active a,
+.links li.active span {
+  color: #fff !important;              /* White text/icon for contrast */
+  font-weight: 600;
+}
+
+
+.bottom-links {
+  margin-top: auto;
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tempahan</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link rel="stylesheet" href="notification.css" />
+</head>
+<body>
+  <!-- Global search bar (inserted) -->
+  <header class="topbar" role="banner">
+    <div class="search-wrap">
+      <input id="globalSearch" class="search-input" type="search" placzeholder="Search site..." aria-label="Search">
+      <button class="search-btn" type="button" onclick="globalSearch()" aria-label="Search">Search</button>
+    </div>
+  </header>
+  <style>
+    .topbar{position:fixed;left:260px;right:0;top:0;height:64px;display:flex;align-items:center;padding:0 18px;background:transparent;backdrop-filter:none;z-index:999}
+    .search-wrap{max-width:1100px;width:100%;display:flex;gap:8px;background:#ffffff;padding:8px;border-radius:8px}
+    .search-input{flex:1;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px;background:#fff}
+    .search-btn{padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#0b63ff;color:#fff;cursor:pointer}
+    .kotak,.content,main{margin-top:84px}
+    .kotak, main, .content { margin-left: 260px; }
+    @media(max-width:800px){.topbar{left:0} .kotak,.content,main{margin-left:0}}
+  </style>
+  <script>
+    function globalSearch(){
+      const q=document.getElementById('globalSearch').value.trim();
+      if(!q) return;
+      const found = document.querySelectorAll('body *:not(script):not(style)');
+      for(const el of found){
+        if(el.textContent && el.textContent.toLowerCase().includes(q.toLowerCase())){
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          el.style.outline='3px solid #ffea00';
+          setTimeout(()=>el.style.outline='',3000);
+          return;
+        }
+      }
+      alert('No results on this page.');
+    }
+  </script>
+  <aside class="sidebar">
+    <div class="logo">
+  <img src="../../IMG/PROTON.png" alt="logo">
+     <h2>Staff</h2>
+    </div>
+ <ul class="links main-links">
+      <li>
+        <span class="material-symbols-outlined">dashboard</span>
+  <a href="/staffs/pages/dashboard.html">Laman Utama</a> <!-- changed to staff local page -->
+      </li>
+      <li class="active">
+       <span class="material-symbols-outlined"> car_rental </span>
+  <a href="/staffs/pages/booking.html">Tempahan</a> <!-- staff Booking.html -->
+      </li>
+      <li>
+        <span class="material-symbols-outlined">notifications</span>
+        <a href="/staffs/pages/notification.html">Notifikasi</a> <!-- staff notification.html -->
+      </li>
+       <li>
+      <span class="material-symbols-outlined">history</span>
+        <a href="/staffs/pages/history.html">Sejarah Tempahan</a> <!-- staff vehicle.html -->
+      </li>
+    </ul>
+
+    <ul class="links bottom-links">
+      <li>
+        <span class="material-symbols-outlined">person</span>
+        <a href="/staffs/pages/profile.html">Profil</a> <!-- staff profile -->
+      </li>
+      <li class="logout-link">
+        <span class="material-symbols-outlined">logout</span>
+        <a href="/staffs/pages/logout.html">Log Keluar</a>
+      </li>
+    </ul>
+  </aside>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pendaftaran Akaun</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('../../../IMG/background.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(3px);
+      padding: 30px;
+      width: 340px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .login-box h2 {
+      margin-bottom: 20px;
+    }
+
+    .login-box input {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      border: 1px solid #0bf3ff;
+      border-radius: 8px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4dbeff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-box button:hover {
+      background-color: #1a45df;
+    }
+
+    #register-msg {
+      margin-top: 12px;
+      font-size: 0.9em;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>DAFTAR AKAUN</h2>
+
+    <form id="register-form">
+      <input type="email" id="email" name="email" placeholder="Alamat Emel" required />
+      <input type="password" id="password" name="password" placeholder="Kata Laluan" required />
+      <button type="submit">Daftar Sekarang</button>
+    </form>
+
+    <div id="register-msg"></div>
+  </div>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('register-msg');
+      msg.textContent = '';
+
+      try {
+        // include role from previous selection (default to 'staff')
+        let role = 'staff';
+        try { role = localStorage.getItem('selectedRole') || 'staff'; } catch(e) {}
+
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role })
+        });
+
+        const body = await res.json();
+        if (body.success) {
+          msg.textContent = 'Akaun berjaya didaftarkan. Anda boleh log masuk sekarang.';
+          setTimeout(() => window.location.href = 'formad.html', 1500);
+        } else {
+          msg.textContent = body.message || 'Gagal mendaftar.';
+        }
+      } catch (err) {
+        console.error(err);
+        msg.textContent = 'Ralat rangkaian. Sila cuba lagi.';
+      }
+    });
+  </script>
+</body>
+</html>
