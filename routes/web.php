@@ -63,6 +63,11 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/banners/{id}', 'updateBanner')->name('banners.update');
             Route::delete('/banners/{id}', 'deleteBanner')->name('banners.delete');
             Route::post('/banners/reorder', 'reorderBanners')->name('banners.reorder');
+
+            // Booking routes
+            Route::get('/bookings/data', 'getBookings')->name('bookings.data');
+            Route::get('/bookings/{id}', 'getBooking')->name('bookings.show');
+            Route::put('/bookings/{id}/status', 'updateBookingStatus')->name('bookings.updateStatus');
         });
 });
 

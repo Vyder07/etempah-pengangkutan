@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\EventBanner;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -181,9 +183,120 @@ class AdminController extends Controller
     /**
      * Display the booking calendar page.
      */
-    public function booking()
+    public function booking(Request $request)
     {
-        return view('admin.booking');
+        $view = $request->get('view', 'month'); // month, week, day
+        $date = $request->get('date', now()->format('Y-m-d'));
+        
+        $currentDate = Carbon::parse($date);
+        
+        // Fetch bookings based on view
+        $bookings = Booking::with('user')
+            ->when($view === 'month', function ($query) use ($currentDate) {
+                return $query->whereBetween('start_date', [
+                    $currentDate->copy()->startOfMonth(),
+                    $currentDate->copy()->endOfMonth()
+                ]);
+            })
+            ->when($view === 'week', function ($query) use ($currentDate) {
+                return $query->whereBetween('start_date', [
+                    $currentDate->copy()->startOfWeek(),
+                    $currentDate->copy()->endOfWeek()
+                ]);
+            })
+            ->when($view === 'day', function ($query) use ($currentDate) {
+                return $query->whereDate('start_date', $currentDate);
+            })
+            ->orderBy('start_date')
+            ->get();
+        
+        return view('admin.booking', compact('bookings', 'view', 'currentDate'));
+    }
+
+    /**
+     * Get bookings as JSON for calendar
+     */
+    public function getBookings(Request $request)
+    {
+        $start = $request->get('start');
+        $end = $request->get('end');
+        
+        $bookings = Booking::with('user')
+            ->whereBetween('start_date', [$start, $end])
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id' => $booking->id,
+                    'title' => $booking->vehicle_name,
+                    'start' => $booking->start_date->toIso8601String(),
+                    'end' => $booking->end_date->toIso8601String(),
+                    'color' => $this->getEventColor($booking->status),
+                    'extendedProps' => [
+                        'user' => $booking->user->name,
+                        'vehicle_plate' => $booking->vehicle_plate,
+                        'destination' => $booking->destination,
+                        'purpose' => $booking->purpose,
+                        'status' => $booking->status,
+                        'status_label' => $booking->status_label,
+                        'notes' => $booking->notes,
+                    ]
+                ];
+            });
+        
+        return response()->json($bookings);
+    }
+
+    /**
+     * Get single booking details
+     */
+    public function getBooking($id)
+    {
+        $booking = Booking::with('user')->findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'booking' => $booking,
+        ]);
+    }
+
+    /**
+     * Update booking status
+     */
+    public function updateBookingStatus(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected,completed,cancelled',
+            'notes' => 'nullable|string',
+        ]);
+        
+        $booking->status = $request->status;
+        if ($request->has('notes')) {
+            $booking->notes = $request->notes;
+        }
+        $booking->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Status tempahan berjaya dikemas kini',
+            'booking' => $booking,
+        ]);
+    }
+
+    /**
+     * Get color based on booking status
+     */
+    private function getEventColor($status)
+    {
+        return match($status) {
+            'pending' => '#f59e0b',    // yellow
+            'approved' => '#10b981',   // green
+            'rejected' => '#ef4444',   // red
+            'completed' => '#3b82f6',  // blue
+            'cancelled' => '#6b7280',  // gray
+            default => '#9ca3af',
+        };
     }
 
     /**
