@@ -26,36 +26,28 @@ class AuthController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+        $remember = $request->has('remember');
 
         // Use Laravel's Auth::attempt to authenticate the user
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+
             $user = Auth::user();
 
             // Ensure we read role from the users table (may be null)
-            $role = null;
-            if (isset($user->role)) {
-                $role = $user->role;
-            }
+            $role = $user->role ?? null;
 
             // Choose redirect target based on role
             if ($role === 'admin') {
-                $redirect = url('/admin/dashboard');
+                return redirect()->intended(route('admin.dashboard'));
             } else {
-                $redirect = url('/home');
+                return redirect()->intended('/home');
             }
-
-            return response()->json([
-                'success' => true,
-                'role' => $role,
-                'redirect' => $redirect,
-                'message' => 'Log masuk berjaya.'
-            ]);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid email or password.'
-        ], 401);
+        return back()->withErrors([
+            'email' => 'Email atau kata laluan tidak sah.',
+        ])->withInput($request->only('email'));
     }
 
     /**
@@ -75,26 +67,18 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        // Validate input
+        $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'nullable|in:admin,staff'
+        ]);
+
         $email = $request->input('email');
         $password = $request->input('password');
         $role = $request->input('role') ?? 'staff';
-        // Basic validation
-        if (empty($email) || empty($password)) {
-            return response()->json(['success' => false, 'message' => 'Email dan kata laluan diperlukan.'], 422);
-        }
 
-        // Semak email dah digunakan atau belum (use `email` column)
-        $exists = DB::table('users')->where('email', $email)->first();
-        if ($exists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Email sudah digunakan.'
-            ], 409);
-        }
-
-        // Simpan user baru. The default users table in this project has
-        // `name`, `email`, `password`, `email_verified_at`, `timestamps`.
-        // We'll set a sensible `name` and mark email as verified so user can log in.
+        // Simpan user baru
         DB::table('users')->insert([
             'name' => explode('@', $email)[0],
             'email' => $email,
@@ -105,10 +89,8 @@ class AuthController extends Controller
             'updated_at' => now(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Akaun berjaya didaftarkan.'
-        ]);
+        return redirect()->route($role === 'admin' ? 'admin.auth.login' : 'staff.auth.login')
+            ->with('success', 'Akaun berjaya didaftarkan. Sila log masuk.');
     }
 
     /**
@@ -155,10 +137,10 @@ class AuthController extends Controller
         $status = Password::sendResetLink($request->only('email'));
 
         if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['success' => true, 'message' => __($status)]);
+            return back()->with('success', __($status));
         }
 
-        return response()->json(['success' => false, 'message' => __($status)], 500);
+        return back()->withErrors(['email' => __($status)]);
     }
 
     /**
@@ -185,5 +167,22 @@ class AuthController extends Controller
         }
 
         return response()->json(['success' => false, 'message' => __($status)], 500);
+    }
+
+    public function showStaffLoginForm()
+    {
+        // Return the staff login view
+        // return view('auth.staff_login');
+    }
+
+    public function showStaffRegistrationForm()
+    {
+        // Return the staff registration view
+        // return view('auth.staff_register');
+    }
+
+    public function showLoginOptions()
+    {
+        return view('login.index');
     }
 }

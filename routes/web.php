@@ -2,42 +2,96 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['guest'])->group(function () {
+
+    Route::get('/login', [AuthController::class, 'showLoginOptions'])->name('login');
+    Route::get('/activate/{token}', [AuthController::class, 'activate']);
+    Route::post('/password/email', [AuthController::class, 'sendResetLink']);
+    Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+
+    Route::controller(AuthController::class)
+    ->prefix('staffs')
+    ->name('staff.')
+    ->group(function () {
+        Route::get('/login', 'showStaffLoginForm')->name('auth.login');
+        Route::post('/login', 'login')->name('auth.login.submit');
+        Route::get('/register', 'showStaffRegistrationForm')->name('auth.register');
+        Route::post('/register', 'register')->name('auth.register.submit');
+    });
+
+    Route::controller(AdminController::class)
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/login', 'showLoginForm')->name('auth.login');
+            Route::get('/register', 'showRegistrationForm')->name('auth.register');
+            Route::get('/forgot-password', 'showForgotPasswordForm')->name('auth.forgot');
+        });
+
+    Route::controller(AuthController::class)
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::post('/login', 'login')->name('auth.login.submit');
+            Route::post('/register', 'register')->name('auth.register.submit');
+            Route::post('/forgot-password', 'sendResetLink')->name('auth.forgot.submit');
+        });
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', function() {
+        return view('welcome');
+    });
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Admin authenticated routes
+    Route::controller(AdminController::class)
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/dashboard', 'dashboard')->name('dashboard');
+            Route::get('/booking', 'booking')->name('booking');
+            Route::get('/vehicle', 'vehicle')->name('vehicle');
+            Route::get('/notification', 'notification')->name('notification');
+            Route::get('/profile', 'profile')->name('profile');
+            Route::get('/logout', 'logoutPage')->name('logout.page');
+        });
+});
 
 // ===========================
 //  AUTH API ROUTES
 // ===========================
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::post('/register', [AuthController::class, 'register']);
+
+// Route::post('/logout', [AuthController::class, 'logout']);
+// Route::post('/register', [AuthController::class, 'register']);
 
 // NOTE: API-prefixed routes are defined in `routes/api.php` (use those to avoid conflicts).
 
 // Activation and password reset
-Route::get('/activate/{token}', [AuthController::class, 'activate']);
-Route::post('/password/email', [AuthController::class, 'sendResetLink']);
-Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 
 // ===========================
 //  BASIC TEST ROUTE
 // ===========================
-Route::get('/', function () {
-    return response()->json(['message' => 'Backend Laravel siap untuk frontend']);
-});
+// Route::middleware(['auth'])->get('/', function () {
+//     return response()->json(['message' => 'Backend Laravel siap untuk frontend']);
+// });
 
 // ===========================
 //  FRONTEND ROUTES
 // ===========================
-Route::get('/login', function () {
-    return redirect('/login/index.html');
-});
+// Route::get('/login', function () {
+//     return redirect('/login/index.html');
+// });
 
-Route::get('/register', function () {
-    return redirect('/register/index.html');
-});
+// Route::get('/register', function () {
+//     return redirect('/register/index.html');
+// });
 
-Route::get('/dashboard', function () {
-    return redirect('/dashboard.html');
-});
+// Route::get('/dashboard', function () {
+//     return redirect('/dashboard.html');
+// });
 
 // ===========================
 //  STATIC FRONTEND SERVE (for Apache setups)
