@@ -57,6 +57,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/notification', 'notification')->name('notification');
             Route::get('/profile', 'profile')->name('profile');
             Route::get('/logout', 'logoutPage')->name('logout.page');
+
+            // Event Banner routes
+            Route::post('/banners', 'storeBanner')->name('banners.store');
+            Route::put('/banners/{id}', 'updateBanner')->name('banners.update');
+            Route::delete('/banners/{id}', 'deleteBanner')->name('banners.delete');
+            Route::post('/banners/reorder', 'reorderBanners')->name('banners.reorder');
         });
 });
 
