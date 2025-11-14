@@ -17,7 +17,36 @@ class AdminController extends Controller
     public function dashboard()
     {
         $banners = EventBanner::getActiveBanners();
-        return view('admin.dashboard', compact('banners'));
+
+        // Booking statistics
+        $totalBookings = Booking::count();
+        $pendingBookings = Booking::where('status', 'pending')->count();
+        $approvedBookings = Booking::where('status', 'approved')->count();
+        $todayBookings = Booking::whereDate('start_date', Carbon::today())->count();
+
+        // Recent bookings (last 5)
+        $recentBookings = Booking::with('user')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Upcoming bookings
+        $upcomingBookings = Booking::with('user')
+            ->where('start_date', '>=', Carbon::now())
+            ->where('status', 'approved')
+            ->orderBy('start_date')
+            ->take(3)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'banners',
+            'totalBookings',
+            'pendingBookings',
+            'approvedBookings',
+            'todayBookings',
+            'recentBookings',
+            'upcomingBookings'
+        ));
     }
 
     /**
@@ -187,9 +216,9 @@ class AdminController extends Controller
     {
         $view = $request->get('view', 'month'); // month, week, day
         $date = $request->get('date', now()->format('Y-m-d'));
-        
+
         $currentDate = Carbon::parse($date);
-        
+
         // Fetch bookings based on view
         $bookings = Booking::with('user')
             ->when($view === 'month', function ($query) use ($currentDate) {
@@ -209,7 +238,7 @@ class AdminController extends Controller
             })
             ->orderBy('start_date')
             ->get();
-        
+
         return view('admin.booking', compact('bookings', 'view', 'currentDate'));
     }
 
@@ -220,7 +249,7 @@ class AdminController extends Controller
     {
         $start = $request->get('start');
         $end = $request->get('end');
-        
+
         $bookings = Booking::with('user')
             ->whereBetween('start_date', [$start, $end])
             ->get()
@@ -242,7 +271,7 @@ class AdminController extends Controller
                     ]
                 ];
             });
-        
+
         return response()->json($bookings);
     }
 
@@ -252,7 +281,7 @@ class AdminController extends Controller
     public function getBooking($id)
     {
         $booking = Booking::with('user')->findOrFail($id);
-        
+
         return response()->json([
             'success' => true,
             'booking' => $booking,
@@ -265,18 +294,18 @@ class AdminController extends Controller
     public function updateBookingStatus(Request $request, $id)
     {
         $booking = Booking::findOrFail($id);
-        
+
         $request->validate([
             'status' => 'required|in:pending,approved,rejected,completed,cancelled',
             'notes' => 'nullable|string',
         ]);
-        
+
         $booking->status = $request->status;
         if ($request->has('notes')) {
             $booking->notes = $request->notes;
         }
         $booking->save();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Status tempahan berjaya dikemas kini',
@@ -304,7 +333,12 @@ class AdminController extends Controller
      */
     public function vehicle()
     {
-        return view('admin.vehicle');
+        $bookings = Booking::with(['user', 'media'])
+            ->whereHas('media')
+            ->latest()
+            ->get();
+
+        return view('admin.vehicle', compact('bookings'));
     }
 
     /**
@@ -353,5 +387,70 @@ class AdminController extends Controller
     public function showForgotPasswordForm()
     {
         return view('admin.auth.forgot');
+    }
+
+    /**
+     * Get booking attachments as JSON
+     */
+    public function getBookingAttachments()
+    {
+        $bookings = Booking::with(['user', 'media'])
+            ->whereHas('media')
+            ->latest()
+            ->get();
+
+        $documents = [];
+        foreach ($bookings as $booking) {
+            foreach ($booking->getMedia('attachments') as $media) {
+                $documents[] = [
+                    'id' => $media->id,
+                    'booking_id' => $booking->id,
+                    'name' => $media->file_name,
+                    'date' => $media->created_at->format('Y-m-d'),
+                    'size' => $this->formatBytes($media->size),
+                    'summary' => "Tempahan: {$booking->vehicle_name} - {$booking->destination}",
+                    'staff' => $booking->user->name,
+                    'url' => $media->getUrl(),
+                    'mime_type' => $media->mime_type,
+                ];
+            }
+        }
+
+        return response()->json($documents);
+    }
+
+    /**
+     * Delete booking attachment
+     */
+    public function deleteBookingAttachment($id)
+    {
+        try {
+            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($id);
+            $media->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Fail berjaya dipadam'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memadam fail'
+            ], 500);
+        }
+    }
+
+    /**
+     * Format bytes to human readable size
+     */
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= (1024 ** $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

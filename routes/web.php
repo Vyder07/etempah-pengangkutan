@@ -68,6 +68,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/bookings/data', 'getBookings')->name('bookings.data');
             Route::get('/bookings/{id}', 'getBooking')->name('bookings.show');
             Route::put('/bookings/{id}/status', 'updateBookingStatus')->name('bookings.updateStatus');
+
+            // Document/Attachment routes
+            Route::get('/documents/data', 'getBookingAttachments')->name('documents.data');
+            Route::delete('/documents/{id}', 'deleteBookingAttachment')->name('documents.delete');
         });
 });
 

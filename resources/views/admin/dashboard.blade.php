@@ -5,362 +5,51 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
 <style>
-    /* Banner carousel container */
-    .banner-carousel-wrapper {
-        position: relative;
-        width: 100%;
-        height: 320px;
-        overflow: hidden;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        background: #d1d5db;
-    }
-
-    .banner-carousel {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
+    /* Only keeping styles that can't be easily done with Tailwind */
     .banner-slide {
         display: none;
-        position: relative;
-        width: 100%;
-        height: 100%;
     }
-
     .banner-slide.active {
         display: block;
     }
-
-    .banner-slide img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.8);
-    }
-
-    .banner-text {
-        position: absolute;
-        bottom: 20px;
-        left: 30px;
-        color: #fff;
-        z-index: 5;
-        max-width: 70%;
-    }
-
-    .banner-text h2 {
-        margin: 0;
-        font-size: 1.8em;
-        font-weight: 600;
-        text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    }
-
-    .banner-text p {
-        margin-top: 6px;
-        font-size: 1em;
-        opacity: 0.9;
-    }
-
-    /* Banner controls */
-    .banner-controls {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        display: flex;
-        gap: 10px;
-        z-index: 10;
-    }
-
-    .banner-btn {
-        background: rgba(255,255,255,0.3);
-        backdrop-filter: blur(10px);
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .banner-btn:hover {
-        background: rgba(255,255,255,0.5);
-        transform: scale(1.1);
-    }
-
-    .banner-btn .material-icons {
-        color: #fff;
-        font-size: 24px;
-    }
-
-    /* Navigation arrows */
-    .carousel-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0,0,0,0.5);
-        border: none;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 10;
-        transition: all 0.3s;
-    }
-
-    .carousel-nav:hover {
-        background: rgba(0,0,0,0.7);
-    }
-
-    .carousel-nav.prev {
-        left: 20px;
-    }
-
-    .carousel-nav.next {
-        right: 20px;
-    }
-
-    .carousel-nav .material-icons {
-        color: #fff;
-        font-size: 32px;
-    }
-
-    /* Carousel indicators */
-    .carousel-indicators {
-        position: absolute;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 8px;
-        z-index: 10;
-    }
-
     .indicator {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.5);
-        cursor: pointer;
         transition: all 0.3s;
     }
-
     .indicator.active {
         background: #fff;
         width: 30px;
         border-radius: 5px;
     }
-
-    /* Empty state */
-    .empty-banner {
+    .summary-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin: 5px 0 0 0;
+    }
+    .booking-item-header {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: #666;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 8px;
     }
-
-    .empty-banner .material-icons {
-        font-size: 64px;
-        margin-bottom: 15px;
-        opacity: 0.5;
-    }
-
-    /* Modal styles */
-    .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: #fff;
-        padding: 25px;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .modal-content h3 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        color: #555;
-        font-weight: 500;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 14px;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-        min-height: 80px;
-    }
-
-    #dropZone {
-        border: 2px dashed #2563eb;
-        padding: 30px;
-        border-radius: 10px;
-        cursor: pointer;
-        text-align: center;
-        color: #2563eb;
-        transition: all 0.3s;
-    }
-
-    #dropZone:hover,
-    #dropZone.drag-over {
-        background: #e0e7ff;
-        border-color: #1d4ed8;
-    }
-
-    .preview-img {
-        margin-top: 15px;
-        width: 100%;
-        max-height: 300px;
-        object-fit: contain;
-        border-radius: 8px;
-        display: none;
-    }
-
-    .preview-img.show {
-        display: block;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-
-    .btn-primary {
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .btn-primary:hover {
-        background: #1d4ed8;
-    }
-
-    .btn-secondary {
-        background: #6b7280;
-        color: #fff;
-    }
-
-    .btn-secondary:hover {
-        background: #4b5563;
-    }
-
-    .btn-danger {
-        background: #dc2626;
-        color: #fff;
-    }
-
-    .btn-danger:hover {
-        background: #b91c1c;
-    }
-
-    /* Banner manager list */
-    .banner-list {
-        margin-top: 30px;
-    }
-
-    .banner-item {
-        display: flex;
-        gap: 15px;
-        padding: 15px;
-        background: #f9fafb;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        align-items: center;
-    }
-
-    .banner-item img {
-        width: 120px;
-        height: 70px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-
-    .banner-item-info {
-        flex: 1;
-    }
-
-    .banner-item-info h4 {
-        margin: 0 0 5px 0;
-        color: #333;
-    }
-
-    .banner-item-info p {
+    .booking-item-header h5 {
+        font-weight: 600;
+        color: #111827;
+        font-size: 15px;
         margin: 0;
-        color: #666;
-        font-size: 14px;
     }
-
-    .banner-item-actions {
-        display: flex;
-        gap: 8px;
+    .booking-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
     }
-
-    .icon-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 50%;
-        transition: all 0.3s;
-    }
-
-    .icon-btn:hover {
-        background: rgba(0,0,0,0.1);
-    }
-
-    .icon-btn .material-icons {
-        font-size: 20px;
-        color: #666;
-    }
-
-    .icon-btn.delete:hover .material-icons {
-        color: #dc2626;
+    .booking-item-details {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.6;
+        margin: 4px 0;
     }
 </style>
 @endpush
@@ -368,54 +57,54 @@
 @section('content')
 <div class="kotak">
     <!-- Banner Carousel -->
-    <div class="banner-carousel-wrapper">
-        <div class="banner-carousel" id="bannerCarousel">
+    <div class="relative w-full h-80 overflow-hidden rounded-xl shadow-lg bg-gray-300">
+        <div class="relative w-full h-full" id="bannerCarousel">
             @if($banners->count() > 0)
                 @foreach($banners as $index => $banner)
-                <div class="banner-slide {{ $index === 0 ? 'active' : '' }}" data-banner-id="{{ $banner->id }}">
-                    <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}">
-                    <div class="banner-text">
-                        <h2>{{ $banner->title }}</h2>
-                        <p>{{ $banner->description }}</p>
+                <div class="banner-slide {{ $index === 0 ? 'active' : '' }} relative w-full h-full" data-banner-id="{{ $banner->id }}">
+                    <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover brightness-75">
+                    <div class="absolute bottom-5 left-7 text-white z-10 max-w-[70%]">
+                        <h2 class="text-3xl font-semibold m-0 drop-shadow-lg">{{ $banner->title }}</h2>
+                        <p class="mt-1.5 text-base opacity-90">{{ $banner->description }}</p>
                     </div>
                 </div>
                 @endforeach
 
                 <!-- Navigation arrows -->
                 @if($banners->count() > 1)
-                <button class="carousel-nav prev" id="prevBtn">
-                    <span class="material-icons">chevron_left</span>
+                <button class="absolute top-1/2 -translate-y-1/2 left-5 bg-black/50 hover:bg-black/70 border-none rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-10 transition-all" id="prevBtn">
+                    <span class="material-icons text-white text-3xl">chevron_left</span>
                 </button>
-                <button class="carousel-nav next" id="nextBtn">
-                    <span class="material-icons">chevron_right</span>
+                <button class="absolute top-1/2 -translate-y-1/2 right-5 bg-black/50 hover:bg-black/70 border-none rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-10 transition-all" id="nextBtn">
+                    <span class="material-icons text-white text-3xl">chevron_right</span>
                 </button>
 
                 <!-- Indicators -->
-                <div class="carousel-indicators" id="indicators">
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10" id="indicators">
                     @foreach($banners as $index => $banner)
-                    <div class="indicator {{ $index === 0 ? 'active' : '' }}" data-slide="{{ $index }}"></div>
+                    <div class="indicator w-2.5 h-2.5 rounded-full bg-white/50 cursor-pointer {{ $index === 0 ? 'active' : '' }}" data-slide="{{ $index }}"></div>
                     @endforeach
                 </div>
                 @endif
             @else
-                <div class="empty-banner">
-                    <span class="material-icons">image_not_supported</span>
+                <div class="flex flex-col items-center justify-center h-full text-gray-600">
+                    <span class="material-icons text-6xl mb-4 opacity-50">image_not_supported</span>
                     <p>Tiada event banner. Klik butang tambah untuk muat naik.</p>
                 </div>
             @endif
         </div>
 
         <!-- Control buttons -->
-        <div class="banner-controls">
-            <button class="banner-btn" id="addBannerBtn" title="Tambah Banner">
-                <span class="material-icons">add</span>
+        <div class="absolute top-5 right-5 flex gap-2.5 z-10">
+            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="addBannerBtn" title="Tambah Banner">
+                <span class="material-icons text-white text-2xl">add</span>
             </button>
             @if($banners->count() > 0)
-            <button class="banner-btn" id="editBannerBtn" title="Edit Banner">
-                <span class="material-icons">edit</span>
+            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="editBannerBtn" title="Edit Banner">
+                <span class="material-icons text-white text-2xl">edit</span>
             </button>
-            <button class="banner-btn" id="deleteBannerBtn" title="Padam Banner">
-                <span class="material-icons">delete</span>
+            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="deleteBannerBtn" title="Padam Banner">
+                <span class="material-icons text-white text-2xl">delete</span>
             </button>
             @endif
         </div>
@@ -423,71 +112,202 @@
 
     <!-- Banner Manager (Optional - shows all banners) -->
     @if($banners->count() > 0)
-    <div class="banner-list">
-        <h3 style="margin-bottom: 15px;">Semua Event Banners</h3>
+    <div class="mt-8">
+        <h3 class="mb-4 text-lg font-semibold">Semua Event Banners</h3>
         @foreach($banners as $banner)
-        <div class="banner-item" data-banner-id="{{ $banner->id }}">
-            <img src="{{ $banner->thumb_url }}" alt="{{ $banner->title }}">
-            <div class="banner-item-info">
-                <h4>{{ $banner->title }}</h4>
-                <p>{{ Str::limit($banner->description, 80) }}</p>
+        <div class="flex gap-4 p-4 bg-gray-50 rounded-lg mb-2.5 items-center" data-banner-id="{{ $banner->id }}">
+            <img src="{{ $banner->thumb_url }}" alt="{{ $banner->title }}" class="w-30 h-[70px] object-cover rounded-md">
+            <div class="flex-1">
+                <h4 class="m-0 mb-1 text-gray-900">{{ $banner->title }}</h4>
+                <p class="m-0 text-gray-600 text-sm">{{ Str::limit($banner->description, 80) }}</p>
             </div>
-            <div class="banner-item-actions">
-                <button class="icon-btn edit-banner-item" data-banner-id="{{ $banner->id }}" title="Edit">
-                    <span class="material-icons">edit</span>
+            <div class="flex gap-2">
+                <button class="bg-transparent border-none cursor-pointer p-2 rounded-full transition-all hover:bg-black/10 edit-banner-item" data-banner-id="{{ $banner->id }}" title="Edit">
+                    <span class="material-icons text-xl text-gray-600">edit</span>
                 </button>
-                <button class="icon-btn delete delete-banner-item" data-banner-id="{{ $banner->id }}" title="Padam">
-                    <span class="material-icons">delete</span>
+                <button class="bg-transparent border-none cursor-pointer p-2 rounded-full transition-all hover:bg-black/10 delete-banner-item" data-banner-id="{{ $banner->id }}" title="Padam">
+                    <span class="material-icons text-xl text-gray-600 hover:text-red-600">delete</span>
                 </button>
             </div>
         </div>
         @endforeach
     </div>
     @endif
+
+    <!-- Booking Summary Section -->
+    <div class="mt-8">
+        <h3 class="mb-5 text-2xl font-semibold text-gray-900">Ringkasan Tempahan</h3>
+
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Total Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <span class="material-icons text-white text-3xl">event_note</span>
+                </div>
+                <div>
+                    <h4 class="m-0 text-sm text-gray-500 font-medium">Jumlah Tempahan</h4>
+                    <p class="summary-value">{{ $totalBookings }}</p>
+                </div>
+            </div>
+
+            <!-- Pending Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <span class="material-icons text-white text-3xl">pending_actions</span>
+                </div>
+                <div>
+                    <h4 class="m-0 text-sm text-gray-500 font-medium">Menunggu Kelulusan</h4>
+                    <p class="summary-value">{{ $pendingBookings }}</p>
+                </div>
+            </div>
+
+            <!-- Approved Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <span class="material-icons text-white text-3xl">check_circle</span>
+                </div>
+                <div>
+                    <h4 class="m-0 text-sm text-gray-500 font-medium">Diluluskan</h4>
+                    <p class="summary-value">{{ $approvedBookings }}</p>
+                </div>
+            </div>
+
+            <!-- Today's Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <span class="material-icons text-white text-3xl">today</span>
+                </div>
+                <div>
+                    <h4 class="m-0 text-sm text-gray-500 font-medium">Tempahan Hari Ini</h4>
+                    <p class="summary-value">{{ $todayBookings }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div class="grid md:grid-cols-2 gap-5">
+            <!-- Recent Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md">
+                <h4 class="m-0 mb-5 text-xl text-gray-900">Tempahan Terkini</h4>
+                <div class="flex flex-col gap-3">
+                    @forelse($recentBookings as $booking)
+                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 transition-all hover:bg-gray-100 hover:translate-x-0.5" style="border-left-color: {{ $booking->status_color }};">
+                        <div class="booking-item-header">
+                            <h5>{{ $booking->user->name }}</h5>
+                            <span class="booking-status" style="background-color: {{ $booking->status_color }};">
+                                {{ $booking->status_label }}
+                            </span>
+                        </div>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">directions_car</span>
+                            {{ $booking->vehicle_name }} ({{ $booking->vehicle_plate }})
+                        </p>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">event</span>
+                            {{ \Carbon\Carbon::parse($booking->start_date)->format('d/m/Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d/m/Y H:i') }}
+                        </p>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">place</span>
+                            {{ $booking->destination }}
+                        </p>
+                    </div>
+                    @empty
+                    <div class="text-center py-8 text-gray-400">
+                        <span class="material-icons text-5xl mb-2.5 opacity-50">event_busy</span>
+                        <p>Tiada tempahan terkini</p>
+                    </div>
+                    @endforelse
+                </div>
+                <a href="{{ route('admin.booking') }}" class="block text-center mt-4 py-2.5 text-blue-600 no-underline font-medium rounded-md transition-all hover:bg-blue-50">
+                    Lihat Semua Tempahan
+                    <span class="material-icons text-base align-middle">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- Upcoming Bookings -->
+            <div class="bg-white p-5 rounded-xl shadow-md">
+                <h4 class="m-0 mb-5 text-xl text-gray-900">Tempahan Akan Datang</h4>
+                <div class="flex flex-col gap-3">
+                    @forelse($upcomingBookings as $booking)
+                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 transition-all hover:bg-gray-100 hover:translate-x-0.5" style="border-left-color: {{ $booking->status_color }};">
+                        <div class="booking-item-header">
+                            <h5>{{ $booking->user->name }}</h5>
+                            <span class="booking-status" style="background-color: {{ $booking->status_color }};">
+                                {{ $booking->status_label }}
+                            </span>
+                        </div>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">directions_car</span>
+                            {{ $booking->vehicle_name }} ({{ $booking->vehicle_plate }})
+                        </p>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">event</span>
+                            {{ \Carbon\Carbon::parse($booking->start_date)->format('d/m/Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d/m/Y H:i') }}
+                        </p>
+                        <p class="booking-item-details">
+                            <span class="material-icons text-base align-middle">place</span>
+                            {{ $booking->destination }}
+                        </p>
+                    </div>
+                    @empty
+                    <div class="text-center py-8 text-gray-400">
+                        <span class="material-icons text-5xl mb-2.5 opacity-50">event_available</span>
+                        <p>Tiada tempahan akan datang yang diluluskan</p>
+                    </div>
+                    @endforelse
+                </div>
+                <a href="{{ route('admin.booking') }}" class="block text-center mt-4 py-2.5 text-blue-600 no-underline font-medium rounded-md transition-all hover:bg-blue-50">
+                    Lihat Kalendar Tempahan
+                    <span class="material-icons text-base align-middle">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Add/Edit Banner Modal -->
-<div class="modal" id="bannerModal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Tambah Event Banner</h3>
+<div class="hidden fixed inset-0 bg-black/50 justify-center items-center z-[1000]" id="bannerModal">
+    <div class="bg-white p-6 rounded-xl w-[90%] max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
+        <h3 class="mt-0 mb-5 text-gray-900" id="modalTitle">Tambah Event Banner</h3>
         <form id="bannerForm">
             <input type="hidden" id="bannerId" value="">
-            
-            <div class="form-group">
-                <label for="bannerTitle">Tajuk Event *</label>
-                <input type="text" id="bannerTitle" required placeholder="Contoh: Majlis Konvokesyen 2025">
+
+            <div class="mb-4">
+                <label for="bannerTitle" class="block mb-1.5 text-gray-700 font-medium">Tajuk Event *</label>
+                <input type="text" id="bannerTitle" required placeholder="Contoh: Majlis Konvokesyen 2025" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
             </div>
 
-            <div class="form-group">
-                <label for="bannerDescription">Keterangan</label>
-                <textarea id="bannerDescription" placeholder="Keterangan ringkas tentang event"></textarea>
+            <div class="mb-4">
+                <label for="bannerDescription" class="block mb-1.5 text-gray-700 font-medium">Keterangan</label>
+                <textarea id="bannerDescription" placeholder="Keterangan ringkas tentang event" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm resize-y min-h-[80px]"></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Gambar Banner *</label>
-                <div id="dropZone">
+            <div class="mb-4">
+                <label class="block mb-1.5 text-gray-700 font-medium">Gambar Banner *</label>
+                <div id="dropZone" class="border-2 border-dashed border-blue-600 p-8 rounded-lg cursor-pointer text-center text-blue-600 transition-all hover:bg-blue-50">
                     <p>Seret dan lepas gambar di sini atau klik untuk pilih fail</p>
-                    <input type="file" id="imgInput" accept="image/*" style="display:none;">
+                    <input type="file" id="imgInput" accept="image/*" class="hidden">
                 </div>
-                <img id="preview" class="preview-img" src="" alt="Preview">
+                <img id="preview" class="mt-4 w-full max-h-[300px] object-contain rounded-lg hidden" src="" alt="Preview">
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" id="cancelBtn">Batal</button>
-                <button type="submit" class="btn btn-primary" id="saveBtn">Simpan</button>
+            <div class="flex gap-2.5 mt-5">
+                <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-gray-600 text-white transition-all hover:bg-gray-700" id="cancelBtn">Batal</button>
+                <button type="submit" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-blue-600 text-white transition-all hover:bg-blue-700" id="saveBtn">Simpan</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal" id="deleteModal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h3>Padam Banner</h3>
-        <p>Adakah anda pasti ingin memadam banner ini?</p>
-        <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Batal</button>
-            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Padam</button>
+<div class="hidden fixed inset-0 bg-black/50 justify-center items-center z-[1000]" id="deleteModal">
+    <div class="bg-white p-6 rounded-xl max-w-sm shadow-xl">
+        <h3 class="mt-0 mb-4 text-gray-900">Padam Banner</h3>
+        <p class="mb-5 text-gray-600">Adakah anda pasti ingin memadam banner ini?</p>
+        <div class="flex gap-2.5">
+            <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-gray-600 text-white transition-all hover:bg-gray-700" id="cancelDeleteBtn">Batal</button>
+            <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-red-600 text-white transition-all hover:bg-red-700" id="confirmDeleteBtn">Padam</button>
         </div>
     </div>
 </div>
@@ -517,13 +337,13 @@
     // Carousel functions
     function showSlide(n) {
         if (totalSlides === 0) return;
-        
+
         currentSlide = (n + totalSlides) % totalSlides;
-        
+
         slides.forEach((slide, index) => {
             slide.classList.toggle('active', index === currentSlide);
         });
-        
+
         indicators.forEach((indicator, index) => {
             indicator.classList.toggle('active', index === currentSlide);
         });
@@ -569,13 +389,15 @@
         document.getElementById('bannerTitle').value = '';
         document.getElementById('bannerDescription').value = '';
         preview.src = '';
-        preview.classList.remove('show');
+        preview.classList.remove('block');
+        preview.classList.add('hidden');
         selectedFile = null;
         if (cropper) {
             cropper.destroy();
             cropper = null;
         }
-        bannerModal.style.display = 'flex';
+        bannerModal.classList.remove('hidden');
+        bannerModal.classList.add('flex');
     });
 
     // Edit current banner button
@@ -592,7 +414,8 @@
         const activeSlide = document.querySelector('.banner-slide.active');
         if (activeSlide) {
             editingBannerId = activeSlide.dataset.bannerId;
-            deleteModal.style.display = 'flex';
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
         }
     });
 
@@ -620,28 +443,30 @@
         editingBannerId = bannerId;
         document.getElementById('modalTitle').textContent = 'Edit Event Banner';
         document.getElementById('bannerId').value = bannerId;
-        
+
         const title = bannerSlide.querySelector('h2').textContent;
         const description = bannerSlide.querySelector('p').textContent;
-        
+
         document.getElementById('bannerTitle').value = title;
         document.getElementById('bannerDescription').value = description;
-        
+
         preview.src = '';
-        preview.classList.remove('show');
+        preview.classList.remove('block');
+        preview.classList.add('hidden');
         selectedFile = null;
-        
+
         if (cropper) {
             cropper.destroy();
             cropper = null;
         }
-        
-        bannerModal.style.display = 'flex';
+
+        bannerModal.classList.remove('hidden');
+        bannerModal.classList.add('flex');
     }
 
     // File input and drag-drop
     dropZone.addEventListener('click', () => imgInput.click());
-    
+
     imgInput.addEventListener('change', (e) => {
         if (e.target.files[0]) {
             handleFile(e.target.files[0]);
@@ -650,16 +475,16 @@
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropZone.classList.add('drag-over');
+        dropZone.classList.add('bg-blue-50');
     });
 
     dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('drag-over');
+        dropZone.classList.remove('bg-blue-50');
     });
 
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropZone.classList.remove('drag-over');
+        dropZone.classList.remove('bg-blue-50');
         if (e.dataTransfer.files[0]) {
             handleFile(e.dataTransfer.files[0]);
         }
@@ -673,11 +498,12 @@
 
         selectedFile = file;
         const reader = new FileReader();
-        
+
         reader.onload = (e) => {
             preview.src = e.target.result;
-            preview.classList.add('show');
-            
+            preview.classList.remove('hidden');
+            preview.classList.add('block');
+
             setTimeout(() => {
                 if (cropper) cropper.destroy();
                 cropper = new Cropper(preview, {
@@ -691,18 +517,18 @@
                 });
             }, 100);
         };
-        
+
         reader.readAsDataURL(file);
     }
 
     // Form submission
     bannerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const title = document.getElementById('bannerTitle').value;
         const description = document.getElementById('bannerDescription').value;
         const bannerId = document.getElementById('bannerId').value;
-        
+
         // Validate
         if (!title) {
             alert('Sila masukkan tajuk event');
@@ -710,7 +536,7 @@
         }
 
         let imageData = null;
-        
+
         // Get cropped image if available
         if (cropper) {
             const canvas = cropper.getCroppedCanvas({ width: 1280, height: 720 });
@@ -730,10 +556,10 @@
         };
 
         try {
-            const url = bannerId 
+            const url = bannerId
                 ? `/admin/banners/${bannerId}`
                 : '/admin/banners';
-            
+
             const method = bannerId ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -787,7 +613,8 @@
 
     // Cancel buttons
     document.getElementById('cancelBtn').addEventListener('click', () => {
-        bannerModal.style.display = 'none';
+        bannerModal.classList.add('hidden');
+        bannerModal.classList.remove('flex');
         if (cropper) {
             cropper.destroy();
             cropper = null;
@@ -795,14 +622,16 @@
     });
 
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-        deleteModal.style.display = 'none';
+        deleteModal.classList.add('hidden');
+        deleteModal.classList.remove('flex');
         editingBannerId = null;
     });
 
     // Close modals on outside click
     bannerModal.addEventListener('click', (e) => {
         if (e.target === bannerModal) {
-            bannerModal.style.display = 'none';
+            bannerModal.classList.add('hidden');
+            bannerModal.classList.remove('flex');
             if (cropper) {
                 cropper.destroy();
                 cropper = null;
@@ -812,7 +641,8 @@
 
     deleteModal.addEventListener('click', (e) => {
         if (e.target === deleteModal) {
-            deleteModal.style.display = 'none';
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
             editingBannerId = null;
         }
     });
