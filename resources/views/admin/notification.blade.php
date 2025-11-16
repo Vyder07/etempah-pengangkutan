@@ -3,7 +3,7 @@
 @section('title', 'Notifikasi Admin')
 
 @section('content')
-<main class="content ml-[260px] p-6">
+<main class="ml-[260px] w-full p-6">
     <div class="bg-white shadow-lg rounded-xl p-6 w-full">
         <h2 class="text-xl font-bold mb-4">Senarai Notifikasi Permohonan</h2>
 
@@ -13,49 +13,39 @@
                     <th class="py-2 text-left">Nama Pemohon</th>
                     <th class="py-2 text-left">Status</th>
                     <th class="py-2 text-center">Tindakan</th>
-                    <th class="py-2 text-left">Tarikh</th>
+                    <th class="py-2 text-left">Tarikh Permohonan</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="border-b">
+                @forelse($bookings as $booking)
+                <tr class="border-b" data-booking-id="{{ $booking->id }}">
                     <td class="py-3 flex items-center gap-2">
-                        <img src="https://via.placeholder.com/30" class="rounded-full">
-                        Irfan Aidil
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                            {{ substr($booking->user->name, 0, 1) }}
+                        </div>
+                        {{ $booking->user->name }}
                     </td>
-                    <td class="text-yellow-600 font-semibold">MENUNGGU</td>
+                    <td>
+                        <span class="status-badge {{ $booking->status_color }} font-semibold px-3 py-1 rounded">
+                            {{ strtoupper($booking->status_label) }}
+                        </span>
+                    </td>
                     <td class="text-center">
-                        <button onclick="openModal('Irfan Aidil','BPPL','2025-10-23','Memo lawatan pelajar','Memohon untuk meminjam van kolej pada 23/10/2025 bagi tujuan menghantar pelajar ke lawatan sambil belajar ke Kilang Honda Alor Gajah.','Van Kolej',this)" class="text-blue-600 hover:text-blue-800">
+                        <button 
+                            onclick="openModal({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->user->department ?? 'N/A' }}', '{{ $booking->created_at->format('Y-m-d') }}', '{{ $booking->memo_file ?? '' }}', '{{ addslashes($booking->purpose) }}', '{{ $booking->vehicle_name }}', '{{ $booking->destination }}', '{{ $booking->start_date->format('Y-m-d') }}', '{{ $booking->end_date->format('Y-m-d') }}', '{{ $booking->status }}', this)" 
+                            class="text-blue-600 hover:text-blue-800 text-xl">
                             👁
                         </button>
                     </td>
-                    <td>2025-10-23</td>
+                    <td>{{ $booking->created_at->format('d/m/Y') }}</td>
                 </tr>
-                <tr class="border-b">
-                    <td class="py-3 flex items-center gap-2">
-                        <img src="https://via.placeholder.com/30" class="rounded-full">
-                        Puan Natasya
+                @empty
+                <tr>
+                    <td colspan="4" class="text-center py-8 text-gray-500">
+                        Tiada notifikasi permohonan
                     </td>
-                    <td class="text-red-600 font-semibold">DITOLAK</td>
-                    <td class="text-center">
-                        <button onclick="openModal('Puan Natasya','HEA','2025-09-29','Memo projek pelajar','Permohonan menggunakan kenderaan ditolak kerana jadual bertembung.','Kereta Proton',this)" class="text-blue-600 hover:text-blue-800">
-                            👁
-                        </button>
-                    </td>
-                    <td>2025-09-29</td>
                 </tr>
-                <tr class="border-b">
-                    <td class="py-3 flex items-center gap-2">
-                        <img src="https://via.placeholder.com/30" class="rounded-full">
-                        Ustaz Sazali
-                    </td>
-                    <td class="text-red-600 font-semibold">DITOLAK</td>
-                    <td class="text-center">
-                        <button onclick="openModal('Ustaz Sazali','TVET TAHFIZ','2025-09-29','Memo pertandingan hafazan Negeri Melaka','Permohonan menggunakan Van Institut untuk menghantar pelajar tahfiz terpilih untuk menyertai pertandingan hafazan.','VAN Adtec',this)" class="text-blue-600 hover:text-blue-800">
-                            👁
-                        </button>
-                    </td>
-                    <td>2025-09-29</td>
-                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -85,11 +75,18 @@
                 <label class="font-bold">Jenis Kenderaan:</label>
                 <input id="modalKenderaan" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
             </div>
+            <div>
+                <label class="font-bold">Destinasi:</label>
+                <input id="modalDestinasi" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
+            </div>
+            <div>
+                <label class="font-bold">Tempoh:</label>
+                <input id="modalTempoh" class="w-full border rounded px-2 py-1 bg-gray-50 cursor-default" readonly>
+            </div>
             <div class="col-span-2">
                 <label class="font-bold">Memo:</label>
                 <div class="flex items-center gap-2 bg-gray-50 border rounded px-2 py-1">
                     <span id="modalMemo" class="flex-1 text-gray-700 select-none">-</span>
-                    <a id="memoDownload" href="#" download="memo.pdf" class="text-blue-600 hover:text-blue-800">⬇</a>
                 </div>
             </div>
         </div>
@@ -99,64 +96,119 @@
             <textarea id="modalMaklumat" class="w-full border rounded px-2 py-2 bg-gray-50 cursor-default" rows="4" readonly></textarea>
         </div>
 
-        <div class="flex gap-4 justify-center">
-            <button id="approveBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">LULUSKAN</button>
-            <button id="rejectBtn" class="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">TOLAK</button>
+        <div id="actionButtons" class="flex gap-4 justify-center">
+            <button id="approveBtn" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition">LULUSKAN</button>
+            <button id="rejectBtn" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition">TOLAK</button>
         </div>
+
+        <div id="statusMessage" class="hidden mt-4 text-center font-semibold"></div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
+    let currentBookingId = null;
     let currentRow = null;
 
-    function openModal(nama, bahagian, tarikh, memo, maklumat, kenderaan, btn) {
+    function openModal(bookingId, nama, bahagian, tarikh, memo, maklumat, kenderaan, destinasi, startDate, endDate, status, btn) {
+        currentBookingId = bookingId;
+        currentRow = btn.closest("tr");
+
         document.getElementById('detailModal').classList.remove('hidden');
         document.getElementById('modalNama').value = nama;
         document.getElementById('modalBahagian').value = bahagian;
         document.getElementById('modalTarikh').value = tarikh;
-        document.getElementById('modalMemo').innerText = memo;
+        document.getElementById('modalMemo').innerText = memo || 'Tiada memo';
         document.getElementById('modalMaklumat').value = maklumat;
         document.getElementById('modalKenderaan').value = kenderaan;
-        document.getElementById('memoDownload').href = "data:application/pdf;base64,JVBERi0xLjQKJc..."; // dummy pdf
-        currentRow = btn.closest("tr");
+        document.getElementById('modalDestinasi').value = destinasi;
+        document.getElementById('modalTempoh').value = startDate + ' hingga ' + endDate;
+
+        // Hide action buttons if already approved/rejected/completed/cancelled
+        const actionButtons = document.getElementById('actionButtons');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        if (status === 'approved' || status === 'rejected' || status === 'completed' || status === 'cancelled') {
+            actionButtons.classList.add('hidden');
+            statusMessage.classList.remove('hidden');
+            statusMessage.textContent = 'Permohonan ini telah ' + (status === 'approved' ? 'diluluskan' : status === 'rejected' ? 'ditolak' : status === 'completed' ? 'selesai' : 'dibatalkan');
+            statusMessage.className = 'mt-4 text-center font-semibold ' + 
+                (status === 'approved' ? 'text-green-600' : status === 'rejected' ? 'text-red-600' : 'text-gray-600');
+        } else {
+            actionButtons.classList.remove('hidden');
+            statusMessage.classList.add('hidden');
+        }
     }
 
     function closeModal() {
-        if(currentRow){
-            let statusCell = currentRow.querySelector("td:nth-child(2)");
-            if(statusCell.innerText !== "DILULUSKAN" && statusCell.innerText !== "DITOLAK"){
-                statusCell.innerText = "MENUNGGU";
-                statusCell.className = "text-yellow-600 font-semibold";
-            }
-        }
         document.getElementById('detailModal').classList.add('hidden');
+        currentBookingId = null;
+        currentRow = null;
     }
 
-    document.getElementById("approveBtn").addEventListener("click", function(){
-        if(currentRow){
-            let statusCell = currentRow.querySelector("td:nth-child(2)");
-            statusCell.innerText = "DILULUSKAN";
-            statusCell.className = "text-green-600 font-semibold";
-            dimEye(currentRow);
-            closeModal();
+    async function updateBookingStatus(status) {
+        if (!currentBookingId) return;
+
+        try {
+            const response = await fetch(`/admin/notifications/${currentBookingId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ status })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update the status badge in the table
+                if (currentRow) {
+                    const statusBadge = currentRow.querySelector('.status-badge');
+                    statusBadge.textContent = data.status_label.toUpperCase();
+                    statusBadge.className = 'status-badge ' + data.status_color + ' font-semibold px-3 py-1 rounded';
+                }
+
+                // Show success message briefly
+                const statusMessage = document.getElementById('statusMessage');
+                statusMessage.classList.remove('hidden');
+                statusMessage.textContent = data.message;
+                statusMessage.className = 'mt-4 text-center font-semibold text-green-600';
+
+                // Hide action buttons
+                document.getElementById('actionButtons').classList.add('hidden');
+
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    closeModal();
+                }, 1500);
+            } else {
+                alert('Ralat: ' + (data.message || 'Gagal mengemaskini status'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ralat sambungan. Sila cuba lagi.');
+        }
+    }
+
+    document.getElementById("approveBtn").addEventListener("click", function() {
+        if (confirm('Adakah anda pasti untuk meluluskan permohonan ini?')) {
+            updateBookingStatus('approved');
         }
     });
 
-    document.getElementById("rejectBtn").addEventListener("click", function(){
-        if(currentRow){
-            let statusCell = currentRow.querySelector("td:nth-child(2)");
-            statusCell.innerText = "DITOLAK";
-            statusCell.className = "text-red-600 font-semibold";
-            dimEye(currentRow);
-            closeModal();
+    document.getElementById("rejectBtn").addEventListener("click", function() {
+        if (confirm('Adakah anda pasti untuk menolak permohonan ini?')) {
+            updateBookingStatus('rejected');
         }
     });
 
-    function dimEye(row){
-        let eyeBtn = row.querySelector("button");
-        if(eyeBtn) eyeBtn.classList.add("opacity-50","cursor-not-allowed");
-    }
+    // Close modal when clicking outside
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
 </script>
 @endpush

@@ -346,7 +346,37 @@ class AdminController extends Controller
      */
     public function notification()
     {
-        return view('admin.notification');
+        $bookings = Booking::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.notification', compact('bookings'));
+    }
+
+    /**
+     * Update booking status from notification page
+     */
+    public function updateNotificationStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected,completed,cancelled',
+            'notes' => 'nullable|string'
+        ]);
+
+        $booking = Booking::findOrFail($id);
+        $booking->status = $request->status;
+        if ($request->notes) {
+            $booking->notes = $request->notes;
+        }
+        $booking->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status tempahan berjaya dikemaskini',
+            'status' => $booking->status,
+            'status_label' => $booking->status_label,
+            'status_color' => $booking->status_color
+        ]);
     }
 
     /**

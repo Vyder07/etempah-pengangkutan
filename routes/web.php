@@ -72,6 +72,9 @@ Route::middleware(['auth'])->group(function () {
             // Document/Attachment routes
             Route::get('/documents/data', 'getBookingAttachments')->name('documents.data');
             Route::delete('/documents/{id}', 'deleteBookingAttachment')->name('documents.delete');
+
+            // Notification routes
+            Route::put('/notifications/{id}/status', 'updateNotificationStatus')->name('notifications.updateStatus');
         });
 });
 
