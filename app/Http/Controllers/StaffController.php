@@ -38,23 +38,12 @@ class StaffController extends Controller
      */
     public function notification()
     {
-        // Sample data - replace with actual application data
-        $applications = Booking::where('user_id', Auth::id())
+        $bookings = Booking::where('user_id', Auth::id())
             ->with(['user'])
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($booking) {
-                return [
-                    'application_date' => $booking->created_at->format('Y-m-d'),
-                    'vehicle_type' => $booking->vehicle_type ?? 'N/A',
-                    'status' => strtoupper($booking->status),
-                    'memo' => $booking->memo ?? 'N/A',
-                    'details' => $booking->notes ?? 'Tiada maklumat tambahan',
-                    'department' => $booking->department ?? 'N/A',
-                ];
-            });
+            ->get();
 
-        return view('staff.notification', compact('applications'));
+        return view('staff.notification', compact('bookings'));
     }
 
     /**
