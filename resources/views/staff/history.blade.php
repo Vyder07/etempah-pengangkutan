@@ -19,9 +19,24 @@
       <tbody>
         @foreach($bookingHistory as $history)
           <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px;">{{ $history->booking_date }}</td>
-            <td style="padding: 10px;">{{ $history->vehicle_type }}</td>
-            <td style="padding: 10px;">{{ $history->status }}</td>
+            <td style="padding: 10px;">{{ $history->created_at->format('d/m/Y') }}</td>
+            <td style="padding: 10px;">{{ $history->vehicle_name }}</td>
+            <td style="padding: 10px;">
+              <span style="
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                display: inline-block;
+                {{ $history->status == 'approved' ? 'background-color: #dcfce7; color: #16a34a;' : '' }}
+                {{ $history->status == 'rejected' ? 'background-color: #fee2e2; color: #dc2626;' : '' }}
+                {{ $history->status == 'pending' ? 'background-color: #fef3c7; color: #d97706;' : '' }}
+                {{ $history->status == 'completed' ? 'background-color: #dbeafe; color: #2563eb;' : '' }}
+                {{ $history->status == 'cancelled' ? 'background-color: #f3f4f6; color: #6b7280;' : '' }}
+              ">
+                {{ ucfirst($history->status) }}
+              </span>
+            </td>
             <td style="padding: 10px;">{{ $history->notes ?? '-' }}</td>
           </tr>
         @endforeach
