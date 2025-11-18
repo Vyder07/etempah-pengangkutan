@@ -17,9 +17,14 @@
     <!-- Admin CSS -->
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
+    @vite(['resources/js/app.js'])
+
     @stack('styles')
 </head>
 <body>
+    <!-- Toast Notifications -->
+    <x-toast />
+
     <!-- Global search bar -->
     <header class="topbar" role="banner">
         <div class="search-wrap">
@@ -89,6 +94,21 @@
 
     <!-- Scripts -->
     <script>
+        // Echo test listener with toast
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Echo) {
+                window.Echo.channel('test-channel')
+                    .listen('.test-event', (e) => {
+                        console.log('Test event received:', e);
+                        showToast(
+                            'Test Event Received',
+                            e.message || 'WebSocket connection is working!',
+                            'success'
+                        );
+                    });
+            }
+        });
+
         // Global search functionality
         function globalSearch() {
             const q = document.getElementById('globalSearch').value.trim();
