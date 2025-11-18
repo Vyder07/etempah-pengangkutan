@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\StaffController;
 
 Route::middleware(['guest'])->group(function () {
 
@@ -12,13 +13,15 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 
     Route::controller(AuthController::class)
-    ->prefix('staffs')
+    ->prefix('staff')
     ->name('staff.')
     ->group(function () {
         Route::get('/login', 'showStaffLoginForm')->name('auth.login');
-        Route::post('/login', 'login')->name('auth.login.submit');
+        Route::post('/login', 'login')->name('login.submit');
         Route::get('/register', 'showStaffRegistrationForm')->name('auth.register');
-        Route::post('/register', 'register')->name('auth.register.submit');
+        Route::post('/register', 'register')->name('register.submit');
+        Route::get('/forgot-password', 'showStaffForgotPasswordForm')->name('forgot');
+        Route::post('/forgot-password', 'sendResetLink')->name('forgot.submit');
     });
 
     Route::controller(AdminController::class)
@@ -75,6 +78,21 @@ Route::middleware(['auth'])->group(function () {
 
             // Notification routes
             Route::put('/notifications/{id}/status', 'updateNotificationStatus')->name('notifications.updateStatus');
+        });
+
+    // Staff authenticated routes
+    Route::controller(StaffController::class)
+        ->prefix('staff')
+        ->name('staff.')
+        ->group(function () {
+            Route::get('/dashboard', 'dashboard')->name('dashboard');
+            Route::get('/booking', 'booking')->name('booking');
+            Route::get('/notification', 'notification')->name('notification');
+            Route::get('/history', 'history')->name('history');
+            Route::get('/profile', 'profile')->name('profile');
+            Route::put('/profile', 'updateProfile')->name('profile.update');
+            Route::post('/profile/photo', 'uploadProfilePhoto')->name('profile.photo');
+            Route::post('/logout', 'logout')->name('logout');
         });
 });
 

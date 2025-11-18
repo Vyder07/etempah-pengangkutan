@@ -40,6 +40,8 @@ class AuthController extends Controller
             // Choose redirect target based on role
             if ($role === 'admin') {
                 return redirect()->intended(route('admin.dashboard'));
+            } elseif ($role === 'staff') {
+                return redirect()->intended(route('staff.dashboard'));
             } else {
                 return redirect()->intended('/home');
             }
@@ -55,11 +57,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // Untuk sekarang, cuma return success message
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout berjaya.'
-        ]);
+        // logout the user
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 
     /**
@@ -171,14 +173,17 @@ class AuthController extends Controller
 
     public function showStaffLoginForm()
     {
-        // Return the staff login view
-        // return view('auth.staff_login');
+        return view('staff.login');
     }
 
     public function showStaffRegistrationForm()
     {
-        // Return the staff registration view
-        // return view('auth.staff_register');
+        return view('staff.register');
+    }
+
+    public function showStaffForgotPasswordForm()
+    {
+        return view('staff.forgot');
     }
 
     public function showLoginOptions()
