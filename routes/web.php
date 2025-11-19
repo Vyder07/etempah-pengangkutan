@@ -48,8 +48,10 @@ Route::middleware(['auth'])->group(function () {
         return view('welcome');
     });
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
-    // Admin authenticated routes
+// Admin authenticated routes - Only accessible by users with 'admin' role
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::controller(AdminController::class)
         ->prefix('admin')
         ->name('admin.')
@@ -81,8 +83,10 @@ Route::middleware(['auth'])->group(function () {
             // Notification routes
             Route::put('/notifications/{id}/status', 'updateNotificationStatus')->name('notifications.updateStatus');
         });
+});
 
-    // Staff authenticated routes
+// Staff authenticated routes - Only accessible by users with 'staff' role
+Route::middleware(['auth', 'role:staff'])->group(function () {
     Route::controller(StaffController::class)
         ->prefix('staff')
         ->name('staff.')
