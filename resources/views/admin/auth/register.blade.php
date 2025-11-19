@@ -22,6 +22,7 @@
 
     <form method="POST" action="{{ route('admin.auth.register.submit') }}">
         @csrf
+        <input type="text" name="name" id="name" placeholder="Nama Penuh" value="{{ old('name') }}" required />
         <input type="email" name="email" id="email" placeholder="Alamat Emel" value="{{ old('email') }}" required />
         <input type="password" name="password" id="password" placeholder="Kata Laluan" required />
         <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Sahkan Kata Laluan" required />

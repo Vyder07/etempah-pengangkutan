@@ -200,12 +200,34 @@
               <li>{{ $error }}</li>
             @endforeach
           </ul>
+          @if($errors->has('email') && str_contains($errors->first('email'), 'sahkan e-mel'))
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">
+              <button type="button" onclick="document.getElementById('resendForm').style.display='block'"
+                      style="background: none; border: none; color: #4ade80; cursor: pointer; text-decoration: underline; padding: 0; font-size: 14px;">
+                Hantar semula e-mel pengesahan
+              </button>
+            </div>
+            <form id="resendForm" method="POST" action="{{ route('staff.resend.verification') }}" style="display: none; margin-top: 15px;">
+              @csrf
+              <input type="email" name="email" placeholder="Masukkan e-mel anda" required
+                     style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #0bf3ff; border-radius: 8px; box-sizing: border-box;" />
+              <button type="submit" style="width: 100%; padding: 10px; background: #4ade80; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                Hantar Semula
+              </button>
+            </form>
+          @endif
         </div>
       @endif
 
       @if(session('success'))
         <div class="success-message">
           {{ session('success') }}
+        </div>
+      @endif
+
+      @if(session('info'))
+        <div style="background-color: rgba(96, 165, 250, 0.9); color: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em;">
+          {{ session('info') }}
         </div>
       @endif
 

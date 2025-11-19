@@ -371,6 +371,10 @@
                 <button class="btn btn-complete" onclick="updateStatus('completed')">
                     Tandakan Selesai
                 </button>
+                <button class="btn btn-download" onclick="downloadPDF()" style="background: #10b981;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">download</span>
+                    Muat Turun PDF
+                </button>
             </div>
 
             <div id="notesSection" style="display: none; margin-top: 15px;">
@@ -472,13 +476,24 @@
 
         // Show/hide action buttons based on status
         const actionsDiv = document.getElementById('modalActions');
+        const downloadBtn = '<button class="btn btn-download" onclick="downloadPDF()" style="background: #10b981;"><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">download</span> Muat Turun PDF</button>';
+
         if (props.status === 'pending') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-approve" onclick="updateStatus('approved')">Luluskan</button>
+                <button class="btn btn-reject" onclick="updateStatus('rejected')">Tolak</button>
+                ${downloadBtn}
+            `;
             actionsDiv.style.display = 'flex';
         } else if (props.status === 'approved') {
-            actionsDiv.innerHTML = '<button class="btn btn-complete" onclick="updateStatus(\'completed\')">Tandakan Selesai</button>';
+            actionsDiv.innerHTML = `
+                <button class="btn btn-complete" onclick="updateStatus('completed')">Tandakan Selesai</button>
+                ${downloadBtn}
+            `;
             actionsDiv.style.display = 'flex';
         } else {
-            actionsDiv.style.display = 'none';
+            actionsDiv.innerHTML = downloadBtn;
+            actionsDiv.style.display = 'flex';
         }
 
         document.getElementById('bookingModal').classList.add('show');
@@ -533,6 +548,17 @@
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
         return `${day}/${month}/${year} ${hours}:${minutes}`;
+    }
+
+    // Download booking as PDF
+    function downloadPDF() {
+        if (!currentBookingId) {
+            alert('Tiada tempahan dipilih');
+            return;
+        }
+
+        // Open PDF in new tab for download
+        window.open(`{{ url('/admin/bookings') }}/${currentBookingId}/pdf`, '_blank');
     }
 
     // Close modal when clicking outside

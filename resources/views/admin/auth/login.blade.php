@@ -9,12 +9,34 @@
     @if ($errors->any())
         <div id="login-msg" style="color: #ff8080; margin-bottom: 15px;">
             {{ $errors->first() }}
+            @if(str_contains($errors->first(), 'sahkan e-mel'))
+                <div style="margin-top: 10px;">
+                    <button type="button" onclick="document.getElementById('resendForm').style.display='block'"
+                            style="background: none; border: none; color: #4ade80; cursor: pointer; text-decoration: underline; padding: 0;">
+                        Hantar semula e-mel pengesahan
+                    </button>
+                </div>
+                <form id="resendForm" method="POST" action="{{ route('admin.resend.verification') }}" style="display: none; margin-top: 10px;">
+                    @csrf
+                    <input type="email" name="email" placeholder="Masukkan e-mel anda" required
+                           style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                    <button type="submit" style="width: 100%; padding: 10px; background: #4ade80; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Hantar Semula
+                    </button>
+                </form>
+            @endif
         </div>
     @endif
 
     @if (session('success'))
         <div style="color: #4ade80; margin-bottom: 15px;">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('info'))
+        <div style="color: #60a5fa; margin-bottom: 15px;">
+            {{ session('info') }}
         </div>
     @endif
 

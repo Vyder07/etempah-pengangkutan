@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\ActivationEmail;
+use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 
 class AuthController extends Controller
 {
@@ -30,9 +32,17 @@ class AuthController extends Controller
 
         // Use Laravel's Auth::attempt to authenticate the user
         if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
+
+            // Check if account is verified (for both admin and staff)
+            if (!$user->is_verified) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Sila sahkan e-mel anda terlebih dahulu. Semak peti masuk anda.',
+                ])->withInput($request->only('email'));
+            }
+
+            $request->session()->regenerate();
 
             // Ensure we read role from the users table (may be null)
             $role = $user->role ?? null;
@@ -82,19 +92,26 @@ class AuthController extends Controller
         $password = $request->input('password');
         $role = $request->input('role') ?? 'staff';
 
-        // Simpan user baru
-        DB::table('users')->insert([
+        // Generate verification token
+        $verificationToken = Str::random(60);
+
+        // Create user with Eloquent to use notifications
+        $user = User::create([
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
             'role' => $role,
-            'email_verified_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'verification_token' => $verificationToken,
+            'is_verified' => false,
+            'email_verified_at' => null,
         ]);
 
+        // Send verification email with appropriate route based on role
+        $verificationUrl = route($role === 'admin' ? 'admin.verify.email' : 'staff.verify.email', ['token' => $verificationToken]);
+        $user->notify(new VerifyEmailNotification($verificationUrl));
+
         return redirect()->route($role === 'admin' ? 'admin.auth.login' : 'staff.auth.login')
-            ->with('success', 'Akaun berjaya didaftarkan! Sila log masuk dengan email dan kata laluan anda.');
+            ->with('success', 'Akaun berjaya didaftarkan! Sila semak e-mel anda untuk mengesahkan akaun.');
     }
 
     /**
@@ -191,5 +208,58 @@ class AuthController extends Controller
     public function showLoginOptions()
     {
         return view('login.index');
+    }
+
+    /**
+     * VERIFY EMAIL
+     */
+    public function verifyEmail($token)
+    {
+        $user = User::where('verification_token', $token)->first();
+
+        if (!$user) {
+            // Try to detect role from URL or default to admin
+            $loginRoute = request()->is('staff/*') ? 'staff.auth.login' : 'admin.auth.login';
+            return redirect()->route($loginRoute)
+                ->withErrors(['email' => 'Token pengesahan tidak sah atau telah tamat tempoh.']);
+        }
+
+        // Update user as verified
+        $user->is_verified = true;
+        $user->email_verified_at = now();
+        $user->verification_token = null;
+        $user->save();
+
+        // Redirect to appropriate login based on user role
+        $loginRoute = $user->role === 'staff' ? 'staff.auth.login' : 'admin.auth.login';
+        return redirect()->route($loginRoute)
+            ->with('success', 'E-mel anda berjaya disahkan! Sila log masuk.');
+    }
+
+    /**
+     * RESEND VERIFICATION EMAIL
+     */
+    public function resendVerification(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->is_verified) {
+            return back()->with('info', 'Akaun ini sudah disahkan.');
+        }
+
+        // Generate new token
+        $verificationToken = Str::random(60);
+        $user->verification_token = $verificationToken;
+        $user->save();
+
+        // Send new verification email with appropriate route based on role
+        $verificationUrl = route($user->role === 'staff' ? 'staff.verify.email' : 'admin.verify.email', ['token' => $verificationToken]);
+        $user->notify(new VerifyEmailNotification($verificationUrl));
+
+        return back()->with('success', 'E-mel pengesahan telah dihantar semula. Sila semak peti masuk anda.');
     }
 }

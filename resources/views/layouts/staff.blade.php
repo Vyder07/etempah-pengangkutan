@@ -37,11 +37,19 @@
                 <input
                     id="globalSearch"
                     type="search"
-                    placeholder="@yield('search-placeholder', 'Cari...')"
+                    placeholder="@yield('search-placeholder', 'Cari tempahan saya...')"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     aria-label="Search"
+                    autocomplete="off"
                 >
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+
+                <!-- Search Results Dropdown -->
+                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+                    <div id="searchResultsContent" class="py-2">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -207,23 +215,140 @@
             }
         });
 
-        // Global search functionality
-        document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const q = this.value.trim();
-                if (!q) return;
-                const found = document.querySelectorAll('main *:not(script):not(style)');
-                for (const el of found) {
-                    if (el.textContent && el.textContent.toLowerCase().includes(q.toLowerCase())) {
-                        el.scrollIntoView({behavior: 'smooth', block: 'center'});
-                        el.style.outline = '3px solid #ffea00';
-                        setTimeout(() => el.style.outline = '', 3000);
-                        return;
-                    }
-                }
-                alert('Tiada hasil ditemui pada halaman ini.');
+        // Global search functionality for staff (searches own bookings only)
+        const searchInput = document.getElementById('globalSearch');
+        const searchResultsDiv = document.getElementById('searchResults');
+        const searchResultsContent = document.getElementById('searchResultsContent');
+        let searchTimeout;
+
+        async function performGlobalSearch(query) {
+            if (!query || query.length < 2) {
+                hideSearchResults();
+                return;
             }
-        });
+
+            try {
+                const response = await fetch(`/staff/search?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+
+                const data = await response.json();
+                displaySearchResults(data, query);
+            } catch (error) {
+                console.error('Search error:', error);
+                searchResultsContent.innerHTML = `
+                    <div class="px-4 py-3 text-center text-red-600">
+                        <span class="material-icons text-2xl">error_outline</span>
+                        <p class="mt-1 text-sm">Ralat semasa mencari</p>
+                    </div>
+                `;
+                searchResultsDiv.classList.remove('hidden');
+            }
+        }
+
+        function displaySearchResults(data, query) {
+            if (!data.bookings?.length) {
+                searchResultsContent.innerHTML = `
+                    <div class="px-4 py-3 text-center text-gray-500">
+                        <span class="material-icons text-4xl opacity-50">search_off</span>
+                        <p class="mt-2">Tiada hasil ditemui untuk "${query}"</p>
+                    </div>
+                `;
+                searchResultsDiv.classList.remove('hidden');
+                return;
+            }
+
+            let html = `
+                <div class="px-3 py-2 bg-gray-50 border-b">
+                    <span class="text-xs font-semibold text-gray-600 uppercase">Tempahan Saya (${data.bookings.length})</span>
+                </div>
+            `;
+
+            data.bookings.forEach(booking => {
+                const statusColors = {
+                    'pending': 'bg-yellow-100 text-yellow-800',
+                    'approved': 'bg-green-100 text-green-800',
+                    'rejected': 'bg-red-100 text-red-800',
+                    'completed': 'bg-blue-100 text-blue-800',
+                    'cancelled': 'bg-gray-100 text-gray-800'
+                };
+                const statusClass = statusColors[booking.status] || 'bg-gray-100 text-gray-800';
+                const vehicleType = booking.vehicle_type ? booking.vehicle_type.toUpperCase() : 'N/A';
+                const vehiclePlate = booking.vehicle_plate || 'N/A';
+                const destination = booking.destination || 'N/A';
+                const vehicleName = booking.vehicle_name || 'N/A';
+                const statusLabel = booking.status_label || booking.status;
+
+                html += `
+                    <a href="/staff/booking?highlight=${booking.id}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <span class="material-icons text-blue-600 mt-1">event</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-gray-900">${vehicleName}</span>
+                                    <span class="text-xs px-2 py-0.5 rounded ${statusClass}">${statusLabel}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-0.5">${destination}</p>
+                                <p class="text-xs text-gray-500 mt-1">${vehicleType} - ${vehiclePlate}</p>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+
+            searchResultsContent.innerHTML = html;
+            searchResultsDiv.classList.remove('hidden');
+        }
+
+        function hideSearchResults() {
+            searchResultsDiv?.classList.add('hidden');
+        }
+
+        if (searchInput) {
+            // Real-time search with debounce
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length < 2) {
+                    hideSearchResults();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    performGlobalSearch(query);
+                }, 300);
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResultsDiv?.contains(e.target)) {
+                    hideSearchResults();
+                }
+            });
+
+            // Show results when focusing if there's content
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length >= 2 && searchResultsContent.innerHTML) {
+                    searchResultsDiv.classList.remove('hidden');
+                }
+            });
+
+            // Navigate with keyboard
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideSearchResults();
+                    this.blur();
+                }
+            });
+        }
 
         // Logout modal functions
         function openLogoutModal() {

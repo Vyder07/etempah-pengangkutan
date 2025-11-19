@@ -236,4 +236,56 @@ class StaffController extends Controller
     {
         return view('staff.logout');
     }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('staff.auth.login');
+    }
+
+    /**
+     * Global search for staff (only searches own bookings)
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([
+                'bookings' => []
+            ]);
+        }
+
+        // Search only current user's bookings
+        $bookings = Booking::where('user_id', Auth::id())
+            ->where(function($q) use ($query) {
+                $q->where('vehicle_name', 'LIKE', "%{$query}%")
+                  ->orWhere('vehicle_plate', 'LIKE', "%{$query}%")
+                  ->orWhere('vehicle_type', 'LIKE', "%{$query}%")
+                  ->orWhere('destination', 'LIKE', "%{$query}%")
+                  ->orWhere('purpose', 'LIKE', "%{$query}%");
+            })
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(function($booking) {
+                return [
+                    'id' => $booking->id,
+                    'vehicle_name' => $booking->vehicle_name,
+                    'vehicle_plate' => $booking->vehicle_plate,
+                    'vehicle_type' => $booking->vehicle_type,
+                    'destination' => $booking->destination,
+                    'purpose' => $booking->purpose,
+                    'status' => $booking->status,
+                    'status_label' => $booking->status_label,
+                ];
+            });
+
+        return response()->json([
+            'bookings' => $bookings
+        ]);
+    }
 }

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\EventBanner;
 use App\Models\Booking;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -317,6 +319,25 @@ class AdminController extends Controller
     }
 
     /**
+     * Download booking as PDF
+     */
+    public function downloadBookingPdf($id)
+    {
+        $booking = Booking::with('user')->findOrFail($id);
+
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.booking-pdf', compact('booking'));
+
+        // Set paper size and orientation
+        $pdf->setPaper('a4', 'portrait');
+
+        // Download with filename
+        $filename = 'Tempahan_' . $booking->id . '_' . date('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
      * Get color based on booking status
      */
     private function getEventColor($status)
@@ -337,9 +358,8 @@ class AdminController extends Controller
     public function vehicle()
     {
         $bookings = Booking::with(['user', 'media'])
-            ->whereHas('media')
             ->latest()
-            ->get();
+            ->paginate(15);
 
         return view('admin.vehicle', compact('bookings'));
     }
@@ -485,8 +505,8 @@ class AdminController extends Controller
         return view('admin.auth.forgot');
     }
 
-    /**
-     * Get booking attachments as JSON
+        /**
+     * Get booking attachments as JSON for the vehicle/documents page
      */
     public function getBookingAttachments()
     {
@@ -513,6 +533,34 @@ class AdminController extends Controller
         }
 
         return response()->json($documents);
+    }
+
+    /**
+     * Get all bookings as JSON for the vehicle page table
+     */
+    public function getVehicleBookings()
+    {
+        $bookings = Booking::with('user')
+            ->latest()
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id' => $booking->id,
+                    'vehicle_type' => $booking->vehicle_type,
+                    'vehicle_name' => $booking->vehicle_name,
+                    'vehicle_plate' => $booking->vehicle_plate,
+                    'user_name' => $booking->user->name,
+                    'destination' => $booking->destination,
+                    'purpose' => $booking->purpose,
+                    'start_date' => $booking->start_date->format('d/m/Y'),
+                    'end_date' => $booking->end_date->format('d/m/Y'),
+                    'status' => $booking->status,
+                    'status_label' => $booking->status_label,
+                    'created_at' => $booking->created_at->format('d/m/Y H:i'),
+                ];
+            });
+
+        return response()->json($bookings);
     }
 
     /**
@@ -548,5 +596,71 @@ class AdminController extends Controller
         $bytes /= (1024 ** $pow);
 
         return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
+    /**
+     * Global search across modules
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([
+                'bookings' => [],
+                'users' => []
+            ]);
+        }
+
+        // Search bookings
+        $bookings = Booking::with('user')
+            ->where(function($q) use ($query) {
+                $q->where('vehicle_name', 'LIKE', "%{$query}%")
+                  ->orWhere('vehicle_plate', 'LIKE', "%{$query}%")
+                  ->orWhere('vehicle_type', 'LIKE', "%{$query}%")
+                  ->orWhere('destination', 'LIKE', "%{$query}%")
+                  ->orWhere('purpose', 'LIKE', "%{$query}%")
+                  ->orWhereHas('user', function($q) use ($query) {
+                      $q->where('name', 'LIKE', "%{$query}%");
+                  });
+            })
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function($booking) {
+                return [
+                    'id' => $booking->id,
+                    'vehicle_name' => $booking->vehicle_name,
+                    'vehicle_plate' => $booking->vehicle_plate,
+                    'vehicle_type' => $booking->vehicle_type,
+                    'user_name' => $booking->user->name,
+                    'destination' => $booking->destination,
+                    'purpose' => $booking->purpose,
+                    'status' => $booking->status,
+                    'status_label' => $booking->status_label,
+                ];
+            });
+
+        // Search users (staff only, not admins for privacy)
+        $users = User::where('role', 'staff')
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('email', 'LIKE', "%{$query}%");
+            })
+            ->limit(5)
+            ->get()
+            ->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ];
+            });
+
+        return response()->json([
+            'bookings' => $bookings,
+            'users' => $users
+        ]);
     }
 }

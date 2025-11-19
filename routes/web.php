@@ -22,6 +22,8 @@ Route::middleware(['guest'])->group(function () {
         Route::post('/register', 'register')->name('register.submit');
         Route::get('/forgot-password', 'showStaffForgotPasswordForm')->name('forgot');
         Route::post('/forgot-password', 'sendResetLink')->name('forgot.submit');
+        Route::get('/verify/{token}', 'verifyEmail')->name('verify.email');
+        Route::post('/resend-verification', 'resendVerification')->name('resend.verification');
     });
 
     Route::controller(AdminController::class)
@@ -40,6 +42,8 @@ Route::middleware(['guest'])->group(function () {
             Route::post('/login', 'login')->name('auth.login.submit');
             Route::post('/register', 'register')->name('auth.register.submit');
             Route::post('/forgot-password', 'sendResetLink')->name('auth.forgot.submit');
+            Route::get('/verify/{token}', 'verifyEmail')->name('verify.email');
+            Route::post('/resend-verification', 'resendVerification')->name('resend.verification');
         });
 });
 
@@ -85,10 +89,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('/bookings/data', 'getBookings')->name('bookings.data');
             Route::get('/bookings/{id}', 'getBooking')->name('bookings.show');
             Route::put('/bookings/{id}/status', 'updateBookingStatus')->name('bookings.updateStatus');
+            Route::get('/bookings/{id}/pdf', 'downloadBookingPdf')->name('bookings.downloadPdf');
 
             // Document/Attachment routes
             Route::get('/documents/data', 'getBookingAttachments')->name('documents.data');
             Route::delete('/documents/{id}', 'deleteBookingAttachment')->name('documents.delete');
+
+            // Vehicle page bookings data
+            Route::get('/vehicle/bookings', 'getVehicleBookings')->name('vehicle.bookings');
+
+            // Global search
+            Route::get('/search', 'search')->name('search');
 
             // Notification routes
             Route::put('/notifications/{id}/status', 'updateNotificationStatus')->name('notifications.updateStatus');
@@ -111,6 +122,9 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
             Route::put('/profile', 'updateProfile')->name('profile.update');
             Route::post('/profile/photo', 'uploadProfilePhoto')->name('profile.photo');
             Route::post('/logout', 'logout')->name('logout');
+
+            // Global search
+            Route::get('/search', 'search')->name('search');
         });
 });
 

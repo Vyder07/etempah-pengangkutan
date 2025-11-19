@@ -25,6 +25,8 @@ class User extends Authenticatable implements HasMedia
         'email',
         'password',
         'role',
+        'verification_token',
+        'is_verified',
     ];
 
     /**
