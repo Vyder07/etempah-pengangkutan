@@ -632,27 +632,5 @@
       submitBtn.textContent = originalText;
     }
   });
-
-  // Listen for booking notifications via WebSocket
-  @if(config('broadcasting.default') === 'reverb' || config('broadcasting.default') === 'pusher')
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.Echo) {
-      window.Echo.channel('bookings')
-        .listen('.booking.created', (e) => {
-          console.log('New booking notification:', e);
-          showToast('Tempahan Baharu', 'Tempahan anda telah dihantar kepada admin', 'success');
-        })
-        .listen('.booking.updated', (e) => {
-          console.log('Booking updated:', e);
-          showToast('Kemas Kini', `Status tempahan: ${e.status}`, 'success');
-
-          // Reload calendar if status changed
-          if (calendar) {
-            setTimeout(() => window.location.reload(), 2000);
-          }
-        });
-    }
-  });
-  @endif
 </script>
 @endpush

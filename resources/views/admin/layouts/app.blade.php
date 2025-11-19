@@ -166,7 +166,7 @@
         // Echo WebSocket listeners for admin
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Echo) {
-                // Listen for new and updated bookings on admin-notifications channel
+                // Listen for new and updated bookings on admin-notifications channel (all admins receive)
                 window.Echo.channel('admin-notifications')
                     .listen('.booking.created', (e) => {
                         console.log('New booking notification for admin:', e);
@@ -180,6 +180,12 @@
 
                         // Play notification sound (optional)
                         // new Audio('/sounds/notification.mp3').play();
+
+                        // Auto-reload if on notification or booking page
+                        if (window.location.pathname.includes('/notification') ||
+                            window.location.pathname.includes('/booking')) {
+                            setTimeout(() => window.location.reload(), 2000);
+                        }
                     })
                     .listen('.booking.updated', (e) => {
                         console.log('Booking updated by staff:', e);
@@ -190,15 +196,12 @@
                                 'success'
                             );
                         }
-                    });
 
-                // Also listen on bookings channel for general updates
-                window.Echo.channel('bookings')
-                    .listen('.booking.created', (e) => {
-                        console.log('Booking created on bookings channel:', e);
-                    })
-                    .listen('.booking.updated', (e) => {
-                        console.log('Booking updated on bookings channel:', e);
+                        // Auto-reload if on notification or booking page
+                        if (window.location.pathname.includes('/notification') ||
+                            window.location.pathname.includes('/booking')) {
+                            setTimeout(() => window.location.reload(), 2000);
+                        }
                     });
 
                 // Test channel for debugging

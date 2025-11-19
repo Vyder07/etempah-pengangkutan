@@ -163,9 +163,32 @@
 
     <!-- Scripts -->
     <script>
-        // Echo test listener with toast
+        // Echo WebSocket listeners for staff
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Echo) {
+                // Listen to private channel for this specific user
+                @auth
+                window.Echo.private('user.{{ Auth::id() }}')
+                    .listen('.booking.created', (e) => {
+                        console.log('Your booking created notification:', e);
+                        if (typeof showToast === 'function') {
+                            showToast('Tempahan Baharu', 'Tempahan anda telah dihantar kepada admin', 'success');
+                        }
+                    })
+                    .listen('.booking.updated', (e) => {
+                        console.log('Your booking updated:', e);
+                        if (typeof showToast === 'function') {
+                            showToast('Kemas Kini Tempahan', `Status tempahan anda: ${e.status}`, 'success');
+                        }
+
+                        // Reload page if on booking page
+                        if (window.location.pathname.includes('/booking')) {
+                            setTimeout(() => window.location.reload(), 2000);
+                        }
+                    });
+                @endauth
+
+                // Test channel for debugging
                 window.Echo.channel('test-channel')
                     .listen('.test-event', (e) => {
                         console.log('Test event received:', e);
@@ -177,6 +200,10 @@
                             );
                         }
                     });
+
+                console.log('Echo listeners initialized for staff (User ID: {{ Auth::id() ?? "guest" }})');
+            } else {
+                console.warn('Echo is not available. WebSocket notifications disabled.');
             }
         });
 
