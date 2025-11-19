@@ -59,6 +59,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/vehicle', 'vehicle')->name('vehicle');
             Route::get('/notification', 'notification')->name('notification');
             Route::get('/profile', 'profile')->name('profile');
+            Route::put('/profile', 'updateProfile')->name('profile.update');
+            Route::post('/profile/photo', 'uploadProfilePhoto')->name('profile.photo');
             Route::get('/logout', 'logoutPage')->name('logout.page');
 
             // Event Banner routes

@@ -388,6 +388,69 @@ class AdminController extends Controller
     }
 
     /**
+     * Update the admin profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . auth()->id(),
+        ]);
+
+        $user = auth()->user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+
+        // Return JSON for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berjaya dikemaskini',
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ]);
+        }
+
+        return redirect()->route('admin.profile')->with('success', 'Profil berjaya dikemaskini');
+    }
+
+    /**
+     * Upload admin profile photo
+     */
+    public function uploadProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        if ($request->hasFile('profile_photo')) {
+            // Clear existing profile photo (Spatie will handle deletion)
+            $user->clearMediaCollection('profile_photo');
+
+            // Add new profile photo to media library
+            $media = $user->addMediaFromRequest('profile_photo')
+                ->usingFileName(time() . '_profile.' . $request->file('profile_photo')->extension())
+                ->toMediaCollection('profile_photo');
+
+            return response()->json([
+                'success' => true,
+                'photo_url' => $user->getFirstMediaUrl('profile_photo', 'profile'),
+                'message' => 'Gambar profil berjaya dikemas kini',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Tiada fail gambar dijumpai',
+        ], 400);
+    }
+
+    /**
      * Display the logout confirmation page.
      */
     public function logoutPage()

@@ -3,8 +3,12 @@
 @section('title', 'Dashboard Staf')
 
 @push('styles')
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
   .carousel-slide {
     opacity: 0;
     transition: opacity 0.6s ease-in-out;
@@ -22,62 +26,164 @@
   .indicator.active {
     transform: scale(1.3);
   }
+
+  .stat-card {
+    animation: fadeIn 0.5s ease-out;
+  }
 </style>
 @endpush
 
 @section('content')
-<div class="flex justify-center items-center w-full">
-  <div class="max-w-[1200px] bg-[rgb(251,252,255)] border-4 border-white rounded-[20px] shadow-[0_6px_18px_rgba(0,0,0,0.1)] flex flex-col items-center p-5 mx-auto opacity-95 relative overflow-hidden">
+<div class="space-y-6">
+  <!-- Welcome Header -->
+  <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Selamat Datang, {{ auth()->user()->name }}! 👋</h1>
+        <p class="text-gray-600">Ringkasan aktiviti dan tempahan terkini.</p>
+      </div>
+      <div class="hidden md:flex items-center gap-4">
+        <img src="{{ asset('IMG/PROTON.png') }}" alt="Proton" class="h-12">
+        <img src="{{ asset('IMG/ADTCMLK.png') }}" alt="ADTEC" class="h-12">
+      </div>
+    </div>
+  </div>
 
-    <!-- Carousel Container -->
-    <div class="relative w-full h-[320px] overflow-hidden rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.15)] bg-gray-300">
+  <!-- Event Banner Carousel -->
+  <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-blue-600">campaign</span>
+      Event & Pengumuman
+    </h2>
+
+    <div class="relative w-full h-96 overflow-hidden rounded-xl shadow-lg bg-gray-300">
       <div class="relative w-full h-full">
         @if(isset($eventBanners) && $eventBanners->count() > 0)
           @foreach($eventBanners as $index => $banner)
-            <div class="carousel-slide absolute top-0 left-0 w-full h-full flex justify-center items-center {{ $index === 0 ? 'active' : '' }}">
-              <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover brightness-[0.85]" />
-              <div class="absolute bottom-5 left-[30px] right-[30px] text-white z-[2]" style="text-shadow: 0 2px 6px rgba(0,0,0,0.5);">
-                <h2 class="m-0 text-[1.8em] font-semibold">{{ $banner->title }}</h2>
-                <p class="mt-1.5 text-base opacity-95">{{ $banner->description }}</p>
+            <div class="carousel-slide absolute top-0 left-0 w-full h-full {{ $index === 0 ? 'active' : '' }}">
+              <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover" />
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <!-- Content -->
+              <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <h2 class="text-4xl font-bold mb-3 drop-shadow-lg">{{ $banner->title }}</h2>
+                <p class="text-lg opacity-95 drop-shadow-md">{{ $banner->description }}</p>
               </div>
             </div>
           @endforeach
 
           <!-- Navigation Buttons (show only if more than 1 banner) -->
           @if($eventBanners->count() > 1)
-            <button class="carousel-btn prev absolute top-1/2 -translate-y-1/2 left-[15px] bg-white/30 backdrop-blur-[10px] border-0 text-white text-2xl w-[50px] h-[50px] rounded-full cursor-pointer z-10 transition-all duration-300 flex items-center justify-center hover:bg-white/50" onclick="changeSlide(-1)">
+            <button class="carousel-btn prev absolute top-1/2 -translate-y-1/2 left-4 bg-white/30 backdrop-blur-md hover:bg-white/50 border-0 text-white text-2xl w-12 h-12 rounded-full cursor-pointer z-10 transition-all duration-300 flex items-center justify-center" onclick="changeSlide(-1)">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            <button class="carousel-btn next absolute top-1/2 -translate-y-1/2 right-[15px] bg-white/30 backdrop-blur-[10px] border-0 text-white text-2xl w-[50px] h-[50px] rounded-full cursor-pointer z-10 transition-all duration-300 flex items-center justify-center hover:bg-white/50" onclick="changeSlide(1)">
+            <button class="carousel-btn next absolute top-1/2 -translate-y-1/2 right-4 bg-white/30 backdrop-blur-md hover:bg-white/50 border-0 text-white text-2xl w-12 h-12 rounded-full cursor-pointer z-10 transition-all duration-300 flex items-center justify-center" onclick="changeSlide(1)">
               <span class="material-symbols-outlined">chevron_right</span>
             </button>
 
             <!-- Carousel Indicators -->
-            <div class="absolute bottom-[15px] left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               @foreach($eventBanners as $index => $banner)
-                <div class="indicator w-2.5 h-2.5 rounded-full bg-white/50 cursor-pointer transition-all duration-300 {{ $index === 0 ? 'active bg-white' : '' }}" onclick="goToSlide({{ $index }})"></div>
+                <div class="indicator w-3 h-3 rounded-full bg-white/50 cursor-pointer transition-all duration-300 hover:bg-white/80 {{ $index === 0 ? 'active bg-white' : '' }}" onclick="goToSlide({{ $index }})"></div>
               @endforeach
             </div>
           @endif
         @else
-          <div class="carousel-slide active absolute top-0 left-0 w-full h-full flex justify-center items-center">
-            <img src="https://via.placeholder.com/900x300?text=Tiada+Event+Terbaharu" alt="Event Banner" class="w-full h-full object-cover brightness-[0.85]" />
-            <div class="absolute bottom-5 left-[30px] right-[30px] text-white z-[2]" style="text-shadow: 0 2px 6px rgba(0,0,0,0.5);">
-              <h2 class="m-0 text-[1.8em] font-semibold">Tiada Event Terbaharu</h2>
-              <p class="mt-1.5 text-base opacity-95">Nantikan kemas kini akan datang daripada pihak pentadbir.</p>
+          <div class="carousel-slide active absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-900">
+            <div class="text-center text-white p-8">
+              <span class="material-symbols-outlined text-6xl mb-4 opacity-50">event_busy</span>
+              <h2 class="text-3xl font-bold mb-3">Tiada Event Terbaharu</h2>
+              <p class="text-lg opacity-90">Nantikan kemas kini akan datang daripada pihak pentadbir.</p>
             </div>
           </div>
         @endif
       </div>
     </div>
 
-    <!-- Event Details -->
-    <div class="mt-4 text-center text-[#333] text-[1.05rem]">
+    <!-- Event Info -->
+    <div class="mt-4 text-center text-gray-700">
       @if(isset($eventBanners) && $eventBanners->count() > 0)
-        <p>Menunjukkan <span class="font-semibold">{{ $eventBanners->count() }}</span> event aktif. Klik penunjuk untuk melihat butiran lain.</p>
+        <p class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-blue-600">info</span>
+          Menunjukkan <span class="font-semibold text-blue-600 mx-1">{{ $eventBanners->count() }}</span> event aktif
+        </p>
       @else
-        <p>Maklumat akan dikemas kini secara automatik apabila pentadbir menambah event baharu.</p>
+        <p class="flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-gray-500">schedule</span>
+          Maklumat akan dikemas kini secara automatik
+        </p>
       @endif
+    </div>
+  </div>
+
+  <!-- Quick Stats (Optional - can add booking stats here) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Total Bookings -->
+    <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm font-medium mb-1">Jumlah Tempahan</p>
+          <h3 class="text-4xl font-bold">{{ $totalBookings ?? '0' }}</h3>
+        </div>
+        <div class="bg-white/20 rounded-full p-4">
+          <span class="material-symbols-outlined text-4xl">calendar_month</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Bookings -->
+    <div class="stat-card bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-amber-100 text-sm font-medium mb-1">Menunggu Kelulusan</p>
+          <h3 class="text-4xl font-bold">{{ $pendingBookings ?? '0' }}</h3>
+        </div>
+        <div class="bg-white/20 rounded-full p-4">
+          <span class="material-symbols-outlined text-4xl">pending</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed Today -->
+    <div class="stat-card bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-xl p-6 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-emerald-100 text-sm font-medium mb-1">Selesai Hari Ini</p>
+          <h3 class="text-4xl font-bold">{{ $completedToday ?? '0' }}</h3>
+        </div>
+        <div class="bg-white/20 rounded-full p-4">
+          <span class="material-symbols-outlined text-4xl">task_alt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-blue-600">bolt</span>
+      Tindakan Pantas
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <a href="{{ route('staff.booking') }}" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl transition-all duration-300 group">
+        <span class="material-symbols-outlined text-5xl text-blue-600 mb-2 group-hover:scale-110 transition-transform">car_rental</span>
+        <span class="text-gray-800 font-semibold">Tempahan Baharu</span>
+      </a>
+
+      <a href="{{ route('staff.notification') }}" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl transition-all duration-300 group">
+        <span class="material-symbols-outlined text-5xl text-purple-600 mb-2 group-hover:scale-110 transition-transform">notifications</span>
+        <span class="text-gray-800 font-semibold">Notifikasi</span>
+      </a>
+
+      <a href="{{ route('staff.history') }}" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl transition-all duration-300 group">
+        <span class="material-symbols-outlined text-5xl text-green-600 mb-2 group-hover:scale-110 transition-transform">history</span>
+        <span class="text-gray-800 font-semibold">Sejarah</span>
+      </a>
+
+      <a href="{{ route('staff.profile') }}" class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-pink-50 to-pink-100 hover:from-pink-100 hover:to-pink-200 rounded-xl transition-all duration-300 group">
+        <span class="material-symbols-outlined text-5xl text-pink-600 mb-2 group-hover:scale-110 transition-transform">person</span>
+        <span class="text-gray-800 font-semibold">Profil Saya</span>
+      </a>
     </div>
   </div>
 </div>

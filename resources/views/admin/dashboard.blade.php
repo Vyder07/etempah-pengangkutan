@@ -2,312 +2,348 @@
 
 @section('title', 'Dashboard Admin')
 
+@section('search-placeholder', 'Cari tempahan, event...')
+
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
 <style>
-    /* Only keeping styles that can't be easily done with Tailwind */
     .banner-slide {
         display: none;
     }
     .banner-slide.active {
         display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
     .indicator {
-        transition: all 0.3s;
+        transition: all 0.3s ease;
     }
     .indicator.active {
-        background: #fff;
-        width: 30px;
-        border-radius: 5px;
-    }
-    .summary-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: #111827;
-        margin: 5px 0 0 0;
-    }
-    .booking-item-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 8px;
-    }
-    .booking-item-header h5 {
-        font-weight: 600;
-        color: #111827;
-        font-size: 15px;
-        margin: 0;
-    }
-    .booking-status {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 600;
-        color: white;
-    }
-    .booking-item-details {
-        font-size: 13px;
-        color: #6b7280;
-        line-height: 1.6;
-        margin: 4px 0;
+        background: #fff !important;
+        width: 32px;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="kotak">
-    <!-- Banner Carousel -->
-    <div class="relative w-full h-80 overflow-hidden rounded-xl shadow-lg bg-gray-300">
-        <div class="relative w-full h-full" id="bannerCarousel">
-            @if($banners->count() > 0)
+<!-- Banner Carousel -->
+<div class="relative w-full h-96 overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-800 to-gray-900 mb-8">
+    <div class="relative w-full h-full" id="bannerCarousel">
+        @if($banners->count() > 0)
+            @foreach($banners as $index => $banner)
+            <div class="banner-slide {{ $index === 0 ? 'active' : '' }} relative w-full h-full" data-banner-id="{{ $banner->id }}">
+                <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div class="absolute bottom-8 left-8 right-8 text-white z-10">
+                    <h2 class="text-4xl font-bold mb-2 drop-shadow-2xl">{{ $banner->title }}</h2>
+                    <p class="text-lg opacity-95 drop-shadow-lg max-w-2xl">{{ $banner->description }}</p>
+                </div>
+            </div>
+            @endforeach
+
+            <!-- Navigation arrows -->
+            @if($banners->count() > 1)
+            <button class="absolute top-1/2 -translate-y-1/2 left-4 bg-white/20 hover:bg-white/40 backdrop-blur-sm border-none rounded-full w-14 h-14 flex items-center justify-center cursor-pointer z-20 transition-all hover:scale-110" id="prevBtn">
+                <span class="material-icons text-white text-4xl">chevron_left</span>
+            </button>
+            <button class="absolute top-1/2 -translate-y-1/2 right-4 bg-white/20 hover:bg-white/40 backdrop-blur-sm border-none rounded-full w-14 h-14 flex items-center justify-center cursor-pointer z-20 transition-all hover:scale-110" id="nextBtn">
+                <span class="material-icons text-white text-4xl">chevron_right</span>
+            </button>
+
+            <!-- Indicators -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20" id="indicators">
                 @foreach($banners as $index => $banner)
-                <div class="banner-slide {{ $index === 0 ? 'active' : '' }} relative w-full h-full" data-banner-id="{{ $banner->id }}">
-                    <img src="{{ $banner->banner_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover brightness-75">
-                    <div class="absolute bottom-5 left-7 text-white z-10 max-w-[70%]">
-                        <h2 class="text-3xl font-semibold m-0 drop-shadow-lg">{{ $banner->title }}</h2>
-                        <p class="mt-1.5 text-base opacity-90">{{ $banner->description }}</p>
-                    </div>
-                </div>
+                <div class="indicator w-3 h-3 rounded-full bg-white/40 cursor-pointer hover:bg-white/60 transition-all {{ $index === 0 ? 'active' : '' }}" data-slide="{{ $index }}"></div>
                 @endforeach
-
-                <!-- Navigation arrows -->
-                @if($banners->count() > 1)
-                <button class="absolute top-1/2 -translate-y-1/2 left-5 bg-black/50 hover:bg-black/70 border-none rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-10 transition-all" id="prevBtn">
-                    <span class="material-icons text-white text-3xl">chevron_left</span>
-                </button>
-                <button class="absolute top-1/2 -translate-y-1/2 right-5 bg-black/50 hover:bg-black/70 border-none rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-10 transition-all" id="nextBtn">
-                    <span class="material-icons text-white text-3xl">chevron_right</span>
-                </button>
-
-                <!-- Indicators -->
-                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10" id="indicators">
-                    @foreach($banners as $index => $banner)
-                    <div class="indicator w-2.5 h-2.5 rounded-full bg-white/50 cursor-pointer {{ $index === 0 ? 'active' : '' }}" data-slide="{{ $index }}"></div>
-                    @endforeach
-                </div>
-                @endif
-            @else
-                <div class="flex flex-col items-center justify-center h-full text-gray-600">
-                    <span class="material-icons text-6xl mb-4 opacity-50">image_not_supported</span>
-                    <p>Tiada event banner. Klik butang tambah untuk muat naik.</p>
-                </div>
+            </div>
             @endif
-        </div>
-
-        <!-- Control buttons -->
-        <div class="absolute top-5 right-5 flex gap-2.5 z-10">
-            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="addBannerBtn" title="Tambah Banner">
-                <span class="material-icons text-white text-2xl">add</span>
-            </button>
-            @if($banners->count() > 0)
-            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="editBannerBtn" title="Edit Banner">
-                <span class="material-icons text-white text-2xl">edit</span>
-            </button>
-            <button class="bg-white/30 backdrop-blur-md border-none rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all hover:bg-white/50 hover:scale-110" id="deleteBannerBtn" title="Padam Banner">
-                <span class="material-icons text-white text-2xl">delete</span>
-            </button>
-            @endif
-        </div>
+        @else
+            <div class="flex flex-col items-center justify-center h-full text-white/70">
+                <span class="material-icons text-8xl mb-4 opacity-40">image_not_supported</span>
+                <p class="text-xl">Tiada event banner. Klik butang tambah untuk muat naik.</p>
+            </div>
+        @endif
     </div>
 
-    <!-- Banner Manager (Optional - shows all banners) -->
-    @if($banners->count() > 0)
-    <div class="mt-8">
-        <h3 class="mb-4 text-lg font-semibold">Semua Event Banners</h3>
+    <!-- Control buttons -->
+    <div class="absolute top-6 right-6 flex gap-3 z-20">
+        <button class="group bg-white/20 hover:bg-white/30 backdrop-blur-md border-none rounded-xl w-12 h-12 flex items-center justify-center cursor-pointer transition-all hover:scale-110" id="addBannerBtn" title="Tambah Banner">
+            <span class="material-icons text-white text-2xl group-hover:scale-110 transition-transform">add</span>
+        </button>
+        @if($banners->count() > 0)
+        <button class="group bg-white/20 hover:bg-white/30 backdrop-blur-md border-none rounded-xl w-12 h-12 flex items-center justify-center cursor-pointer transition-all hover:scale-110" id="editBannerBtn" title="Edit Banner">
+            <span class="material-icons text-white text-2xl group-hover:scale-110 transition-transform">edit</span>
+        </button>
+        <button class="group bg-white/20 hover:bg-white/30 backdrop-blur-md border-none rounded-xl w-12 h-12 flex items-center justify-center cursor-pointer transition-all hover:scale-110" id="deleteBannerBtn" title="Padam Banner">
+            <span class="material-icons text-white text-2xl group-hover:scale-110 transition-transform">delete</span>
+        </button>
+        @endif
+    </div>
+</div>
+
+<!-- Banner Manager -->
+@if($banners->count() > 0)
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+        <span class="material-icons text-3xl">collections</span>
+        Semua Event Banners
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($banners as $banner)
-        <div class="flex gap-4 p-4 bg-gray-50 rounded-lg mb-2.5 items-center" data-banner-id="{{ $banner->id }}">
-            <img src="{{ $banner->thumb_url }}" alt="{{ $banner->title }}" class="w-30 h-[70px] object-cover rounded-md">
-            <div class="flex-1">
-                <h4 class="m-0 mb-1 text-gray-900">{{ $banner->title }}</h4>
-                <p class="m-0 text-gray-600 text-sm">{{ Str::limit($banner->description, 80) }}</p>
+        <div class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-1" data-banner-id="{{ $banner->id }}">
+            <div class="relative h-40 overflow-hidden">
+                <img src="{{ $banner->thumb_url }}" alt="{{ $banner->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-            <div class="flex gap-2">
-                <button class="bg-transparent border-none cursor-pointer p-2 rounded-full transition-all hover:bg-black/10 edit-banner-item" data-banner-id="{{ $banner->id }}" title="Edit">
-                    <span class="material-icons text-xl text-gray-600">edit</span>
-                </button>
-                <button class="bg-transparent border-none cursor-pointer p-2 rounded-full transition-all hover:bg-black/10 delete-banner-item" data-banner-id="{{ $banner->id }}" title="Padam">
-                    <span class="material-icons text-xl text-gray-600 hover:text-red-600">delete</span>
-                </button>
+            <div class="p-4">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">{{ $banner->title }}</h4>
+                <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ $banner->description }}</p>
+                <div class="flex gap-2">
+                    <button class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors edit-banner-item" data-banner-id="{{ $banner->id }}">
+                        <span class="material-icons text-sm">edit</span>
+                        Edit
+                    </button>
+                    <button class="flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors delete-banner-item" data-banner-id="{{ $banner->id }}">
+                        <span class="material-icons text-sm">delete</span>
+                    </button>
+                </div>
             </div>
         </div>
         @endforeach
     </div>
-    @endif
+</div>
+@endif
 
-    <!-- Booking Summary Section -->
-    <div class="mt-8">
-        <h3 class="mb-5 text-2xl font-semibold text-gray-900">Ringkasan Tempahan</h3>
+<!-- Booking Summary Section -->
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+        <span class="material-icons text-3xl">assessment</span>
+        Ringkasan Tempahan
+    </h3>
 
-        <!-- Summary Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <!-- Total Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <!-- Summary Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Bookings -->
+        <div class="group bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span class="material-icons text-white text-3xl">event_note</span>
                 </div>
-                <div>
-                    <h4 class="m-0 text-sm text-gray-500 font-medium">Jumlah Tempahan</h4>
-                    <p class="summary-value">{{ $totalBookings }}</p>
-                </div>
+                <span class="text-white/80 text-sm font-medium">Total</span>
             </div>
-
-            <!-- Pending Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <span class="material-icons text-white text-3xl">pending_actions</span>
-                </div>
-                <div>
-                    <h4 class="m-0 text-sm text-gray-500 font-medium">Menunggu Kelulusan</h4>
-                    <p class="summary-value">{{ $pendingBookings }}</p>
-                </div>
-            </div>
-
-            <!-- Approved Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <span class="material-icons text-white text-3xl">check_circle</span>
-                </div>
-                <div>
-                    <h4 class="m-0 text-sm text-gray-500 font-medium">Diluluskan</h4>
-                    <p class="summary-value">{{ $approvedBookings }}</p>
-                </div>
-            </div>
-
-            <!-- Today's Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="w-15 h-15 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <span class="material-icons text-white text-3xl">today</span>
-                </div>
-                <div>
-                    <h4 class="m-0 text-sm text-gray-500 font-medium">Tempahan Hari Ini</h4>
-                    <p class="summary-value">{{ $todayBookings }}</p>
-                </div>
-            </div>
+            <p class="text-4xl font-bold text-white mb-1">{{ $totalBookings }}</p>
+            <p class="text-white/80 text-sm">Jumlah Tempahan</p>
         </div>
 
-        <!-- Bookings Section -->
-        <div class="grid md:grid-cols-2 gap-5">
-            <!-- Recent Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md">
-                <h4 class="m-0 mb-5 text-xl text-gray-900">Tempahan Terkini</h4>
-                <div class="flex flex-col gap-3">
-                    @forelse($recentBookings as $booking)
-                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 transition-all hover:bg-gray-100 hover:translate-x-0.5" style="border-left-color: {{ $booking->status_color }};">
-                        <div class="booking-item-header">
-                            <h5>{{ $booking->user->name }}</h5>
-                            <span class="booking-status" style="background-color: {{ $booking->status_color }};">
-                                {{ $booking->status_label }}
-                            </span>
-                        </div>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">directions_car</span>
-                            {{ $booking->vehicle_name }} ({{ $booking->vehicle_plate }})
-                        </p>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">event</span>
-                            {{ \Carbon\Carbon::parse($booking->start_date)->format('d/m/Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d/m/Y H:i') }}
-                        </p>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">place</span>
-                            {{ $booking->destination }}
-                        </p>
-                    </div>
-                    @empty
-                    <div class="text-center py-8 text-gray-400">
-                        <span class="material-icons text-5xl mb-2.5 opacity-50">event_busy</span>
-                        <p>Tiada tempahan terkini</p>
-                    </div>
-                    @endforelse
+        <!-- Pending Bookings -->
+        <div class="group bg-gradient-to-br from-pink-500 to-rose-600 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span class="material-icons text-white text-3xl">pending_actions</span>
                 </div>
-                <a href="{{ route('admin.booking') }}" class="block text-center mt-4 py-2.5 text-blue-600 no-underline font-medium rounded-md transition-all hover:bg-blue-50">
-                    Lihat Semua Tempahan
-                    <span class="material-icons text-base align-middle">arrow_forward</span>
-                </a>
+                <span class="text-white/80 text-sm font-medium">Pending</span>
             </div>
+            <p class="text-4xl font-bold text-white mb-1">{{ $pendingBookings }}</p>
+            <p class="text-white/80 text-sm">Menunggu Kelulusan</p>
+        </div>
 
-            <!-- Upcoming Bookings -->
-            <div class="bg-white p-5 rounded-xl shadow-md">
-                <h4 class="m-0 mb-5 text-xl text-gray-900">Tempahan Akan Datang</h4>
-                <div class="flex flex-col gap-3">
-                    @forelse($upcomingBookings as $booking)
-                    <div class="p-4 bg-gray-50 rounded-lg border-l-4 transition-all hover:bg-gray-100 hover:translate-x-0.5" style="border-left-color: {{ $booking->status_color }};">
-                        <div class="booking-item-header">
-                            <h5>{{ $booking->user->name }}</h5>
-                            <span class="booking-status" style="background-color: {{ $booking->status_color }};">
-                                {{ $booking->status_label }}
-                            </span>
-                        </div>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">directions_car</span>
-                            {{ $booking->vehicle_name }} ({{ $booking->vehicle_plate }})
+        <!-- Approved Bookings -->
+        <div class="group bg-gradient-to-br from-cyan-500 to-blue-600 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span class="material-icons text-white text-3xl">check_circle</span>
+                </div>
+                <span class="text-white/80 text-sm font-medium">Approved</span>
+            </div>
+            <p class="text-4xl font-bold text-white mb-1">{{ $approvedBookings }}</p>
+            <p class="text-white/80 text-sm">Diluluskan</p>
+        </div>
+
+        <!-- Today's Bookings -->
+        <div class="group bg-gradient-to-br from-emerald-500 to-teal-600 p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span class="material-icons text-white text-3xl">today</span>
+                </div>
+                <span class="text-white/80 text-sm font-medium">Today</span>
+            </div>
+            <p class="text-4xl font-bold text-white mb-1">{{ $todayBookings }}</p>
+            <p class="text-white/80 text-sm">Tempahan Hari Ini</p>
+        </div>
+    </div>
+
+    <!-- Bookings Section -->
+    <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Recent Bookings -->
+        <div class="bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <span class="material-icons text-blue-600 text-2xl">schedule</span>
+                <h4 class="text-xl font-bold text-gray-900">Tempahan Terkini</h4>
+            </div>
+            <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2">
+                @forelse($recentBookings as $booking)
+                <div class="group p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-l-4 hover:shadow-md transition-all hover:translate-x-1" style="border-left-color: {{ $booking->status_color }};">
+                    <div class="flex justify-between items-start mb-3">
+                        <h5 class="font-semibold text-gray-900 text-base">{{ $booking->user->name }}</h5>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold text-white" style="background-color: {{ $booking->status_color }};">
+                            {{ $booking->status_label }}
+                        </span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">directions_car</span>
+                            <span class="font-medium">{{ $booking->vehicle_name }}</span>
+                            <span class="text-gray-400">({{ $booking->vehicle_plate }})</span>
                         </p>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">event</span>
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">event</span>
                             {{ \Carbon\Carbon::parse($booking->start_date)->format('d/m/Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d/m/Y H:i') }}
                         </p>
-                        <p class="booking-item-details">
-                            <span class="material-icons text-base align-middle">place</span>
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">place</span>
                             {{ $booking->destination }}
                         </p>
                     </div>
-                    @empty
-                    <div class="text-center py-8 text-gray-400">
-                        <span class="material-icons text-5xl mb-2.5 opacity-50">event_available</span>
-                        <p>Tiada tempahan akan datang yang diluluskan</p>
-                    </div>
-                    @endforelse
                 </div>
-                <a href="{{ route('admin.booking') }}" class="block text-center mt-4 py-2.5 text-blue-600 no-underline font-medium rounded-md transition-all hover:bg-blue-50">
-                    Lihat Kalendar Tempahan
-                    <span class="material-icons text-base align-middle">arrow_forward</span>
-                </a>
+                @empty
+                <div class="text-center py-12 text-gray-400">
+                    <span class="material-icons text-6xl mb-3 opacity-30">event_busy</span>
+                    <p class="text-lg">Tiada tempahan terkini</p>
+                </div>
+                @endforelse
             </div>
+            <a href="{{ route('admin.booking') }}" class="flex items-center justify-center gap-2 mt-5 py-3 text-blue-600 font-semibold rounded-xl transition-all hover:bg-blue-50 group">
+                Lihat Semua Tempahan
+                <span class="material-icons group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
+        </div>
+
+        <!-- Upcoming Bookings -->
+        <div class="bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-xl">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <span class="material-icons text-emerald-600 text-2xl">event_upcoming</span>
+                <h4 class="text-xl font-bold text-gray-900">Tempahan Akan Datang</h4>
+            </div>
+            <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2">
+                @forelse($upcomingBookings as $booking)
+                <div class="group p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-l-4 hover:shadow-md transition-all hover:translate-x-1" style="border-left-color: {{ $booking->status_color }};">
+                    <div class="flex justify-between items-start mb-3">
+                        <h5 class="font-semibold text-gray-900 text-base">{{ $booking->user->name }}</h5>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold text-white" style="background-color: {{ $booking->status_color }};">
+                            {{ $booking->status_label }}
+                        </span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">directions_car</span>
+                            <span class="font-medium">{{ $booking->vehicle_name }}</span>
+                            <span class="text-gray-400">({{ $booking->vehicle_plate }})</span>
+                        </p>
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">event</span>
+                            {{ \Carbon\Carbon::parse($booking->start_date)->format('d/m/Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d/m/Y H:i') }}
+                        </p>
+                        <p class="flex items-center gap-2">
+                            <span class="material-icons text-sm">place</span>
+                            {{ $booking->destination }}
+                        </p>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-12 text-gray-400">
+                    <span class="material-icons text-6xl mb-3 opacity-30">event_available</span>
+                    <p class="text-lg">Tiada tempahan akan datang</p>
+                </div>
+                @endforelse
+            </div>
+            <a href="{{ route('admin.booking') }}" class="flex items-center justify-center gap-2 mt-5 py-3 text-emerald-600 font-semibold rounded-xl transition-all hover:bg-emerald-50 group">
+                Lihat Kalendar Tempahan
+                <span class="material-icons group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </a>
         </div>
     </div>
 </div>
 
 <!-- Add/Edit Banner Modal -->
-<div class="hidden fixed inset-0 bg-black/50 justify-center items-center z-[1000]" id="bannerModal">
-    <div class="bg-white p-6 rounded-xl w-[90%] max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
-        <h3 class="mt-0 mb-5 text-gray-900" id="modalTitle">Tambah Event Banner</h3>
-        <form id="bannerForm">
+<div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm justify-center items-center z-[1000] p-4" id="bannerModal">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl animate-fade-in">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+            <h3 class="text-2xl font-bold flex items-center gap-3" id="modalTitle">
+                <span class="material-icons text-3xl">add_photo_alternate</span>
+                Tambah Event Banner
+            </h3>
+        </div>
+
+        <form id="bannerForm" class="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
             <input type="hidden" id="bannerId" value="">
 
-            <div class="mb-4">
-                <label for="bannerTitle" class="block mb-1.5 text-gray-700 font-medium">Tajuk Event *</label>
-                <input type="text" id="bannerTitle" required placeholder="Contoh: Majlis Konvokesyen 2025" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm">
+            <div class="mb-5">
+                <label for="bannerTitle" class="block mb-2 text-gray-800 font-semibold flex items-center gap-2">
+                    <span class="material-icons text-sm">title</span>
+                    Tajuk Event *
+                </label>
+                <input type="text" id="bannerTitle" required placeholder="Contoh: Majlis Konvokesyen 2025" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
             </div>
 
-            <div class="mb-4">
-                <label for="bannerDescription" class="block mb-1.5 text-gray-700 font-medium">Keterangan</label>
-                <textarea id="bannerDescription" placeholder="Keterangan ringkas tentang event" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm resize-y min-h-[80px]"></textarea>
+            <div class="mb-5">
+                <label for="bannerDescription" class="block mb-2 text-gray-800 font-semibold flex items-center gap-2">
+                    <span class="material-icons text-sm">description</span>
+                    Keterangan
+                </label>
+                <textarea id="bannerDescription" placeholder="Keterangan ringkas tentang event" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none resize-y min-h-[100px]"></textarea>
             </div>
 
-            <div class="mb-4">
-                <label class="block mb-1.5 text-gray-700 font-medium">Gambar Banner *</label>
-                <div id="dropZone" class="border-2 border-dashed border-blue-600 p-8 rounded-lg cursor-pointer text-center text-blue-600 transition-all hover:bg-blue-50">
-                    <p>Seret dan lepas gambar di sini atau klik untuk pilih fail</p>
+            <div class="mb-5">
+                <label class="block mb-2 text-gray-800 font-semibold flex items-center gap-2">
+                    <span class="material-icons text-sm">image</span>
+                    Gambar Banner *
+                </label>
+                <div id="dropZone" class="group border-3 border-dashed border-blue-400 p-10 rounded-xl cursor-pointer text-center bg-blue-50/50 hover:bg-blue-100/50 hover:border-blue-600 transition-all">
+                    <span class="material-icons text-6xl text-blue-400 group-hover:text-blue-600 mb-3 block">cloud_upload</span>
+                    <p class="text-blue-600 font-medium">Seret dan lepas gambar di sini</p>
+                    <p class="text-gray-500 text-sm mt-2">atau klik untuk pilih fail</p>
+                    <p class="text-gray-400 text-xs mt-2">Format: JPG, PNG (Max: 5MB)</p>
                     <input type="file" id="imgInput" accept="image/*" class="hidden">
                 </div>
-                <img id="preview" class="mt-4 w-full max-h-[300px] object-contain rounded-lg hidden" src="" alt="Preview">
+                <img id="preview" class="mt-4 w-full max-h-80 object-contain rounded-xl hidden shadow-lg" src="" alt="Preview">
             </div>
 
-            <div class="flex gap-2.5 mt-5">
-                <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-gray-600 text-white transition-all hover:bg-gray-700" id="cancelBtn">Batal</button>
-                <button type="submit" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-blue-600 text-white transition-all hover:bg-blue-700" id="saveBtn">Simpan</button>
+            <div class="flex gap-3 mt-6">
+                <button type="button" class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-all" id="cancelBtn">Batal</button>
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all" id="saveBtn">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="material-icons text-sm">save</span>
+                        Simpan
+                    </span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="hidden fixed inset-0 bg-black/50 justify-center items-center z-[1000]" id="deleteModal">
-    <div class="bg-white p-6 rounded-xl max-w-sm shadow-xl">
-        <h3 class="mt-0 mb-4 text-gray-900">Padam Banner</h3>
-        <p class="mb-5 text-gray-600">Adakah anda pasti ingin memadam banner ini?</p>
-        <div class="flex gap-2.5">
-            <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-gray-600 text-white transition-all hover:bg-gray-700" id="cancelDeleteBtn">Batal</button>
-            <button type="button" class="flex-1 px-5 py-2.5 border-none rounded-lg cursor-pointer text-sm font-medium bg-red-600 text-white transition-all hover:bg-red-700" id="confirmDeleteBtn">Padam</button>
+<div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm justify-center items-center z-[1000] p-4" id="deleteModal">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-fade-in">
+        <div class="bg-gradient-to-r from-red-600 to-rose-600 p-6 text-white">
+            <h3 class="text-2xl font-bold flex items-center gap-3">
+                <span class="material-icons text-3xl">warning</span>
+                Padam Banner
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-lg mb-6">Adakah anda pasti ingin memadam banner ini? Tindakan ini tidak boleh dibatalkan.</p>
+            <div class="flex gap-3">
+                <button type="button" class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-all" id="cancelDeleteBtn">Batal</button>
+                <button type="button" class="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 shadow-lg hover:shadow-xl transition-all" id="confirmDeleteBtn">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="material-icons text-sm">delete</span>
+                        Padam
+                    </span>
+                </button>
+            </div>
         </div>
     </div>
 </div>

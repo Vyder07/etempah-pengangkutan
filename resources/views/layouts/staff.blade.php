@@ -1,365 +1,227 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>@yield('title', 'Staff Portal')</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Staff Dashboard')</title>
 
-  @stack('styles')
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
-
-    body {
-      min-height: 100vh;
-      width: 100%;
-      background-image: url('{{ asset('IMG/Car1.jpg') }}');
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 260px;
-      height: 100%;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(17px);
-      border-right: 1px solid rgba(255,255,255,0.7);
-      display: flex;
-      flex-direction: column;
-      padding: 20px 0;
-      z-index: 1000;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      color: #000;
-    }
-
-    .logo img {
-      width: 43px;
-      border-radius: 50%;
-    }
-
-    .logo h2 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-left: 15px;
-    }
-
-    .links {
-      list-style: none;
-      padding: 0 8px;
-    }
-
-    .links li {
-      display: flex;
-      align-items: center;
-      border-radius: 4px;
-      padding: 10px;
-      transition: background 0.3s;
-    }
-
-    .links li:hover {
-      background: rgba(0,0,0,0.05);
-      cursor: pointer;
-    }
-
-    .links li span {
-      padding-right: 10px;
-      font-size: 24px;
-      color: #000;
-    }
-
-    .links li a {
-      text-decoration: none;
-      color: #000;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .links li.active {
-      background: #0a4c9a;
-      border-left: 4px solid #fff;
-    }
-
-    .links li.active a,
-    .links li.active span {
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .bottom-links {
-      margin-top: auto;
-    }
-
-    /* Topbar */
-    .topbar {
-      position: fixed;
-      left: 260px;
-      right: 0;
-      top: 0;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      padding: 0 18px;
-      background: transparent;
-      z-index: 999;
-    }
-
-    .search-wrap {
-      max-width: 1100px;
-      width: 100%;
-      display: flex;
-      gap: 8px;
-      background: #ffffff;
-      padding: 8px;
-      border-radius: 8px;
-    }
-
-    .search-input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      background: #fff;
-    }
-
-    .search-btn {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      background: #0b63ff;
-      color: #fff;
-      cursor: pointer;
-      border: none;
-    }
-
-    /* Main content */
-    .content {
-      margin-left: 260px;
-      margin-top: 84px;
-      padding: 20px;
-    }
-
-    /* Logout modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-    }
-
-    .modal[aria-hidden="false"] {
-      display: flex;
-    }
-
-    .modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-    }
-
-    .modal-panel {
-      position: relative;
-      background: #fff;
-      border-radius: 10px;
-      padding: 18px 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-      max-width: 360px;
-      width: 90%;
-      z-index: 1;
-      text-align: center;
-    }
-
-    .modal-panel h3 {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-    }
-
-    .modal-panel p {
-      margin: 0 0 12px;
-      color: #444;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .btn {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background: #f5f5f5;
-      cursor: pointer;
-    }
-
-    .btn.primary {
-      background: #dc2626;
-      color: #fff;
-      border-color: #dc2626;
-    }
-
-    @media(max-width: 800px) {
-      .topbar {
-        left: 0;
-      }
-      .content {
-        margin-left: 0;
-      }
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo">
-      <img src="{{ asset('IMG/PROTON.png') }}" alt="logo">
-      <h2>Staf</h2>
-    </div>
-    <ul class="links main-links">
-      <li class="{{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">dashboard</span>
-        <a href="{{ route('staff.dashboard') }}">Laman Utama</a>
-      </li>
-      <li class="{{ request()->routeIs('staff.booking') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">car_rental</span>
-        <a href="{{ route('staff.booking') }}">Tempahan</a>
-      </li>
-      <li class="{{ request()->routeIs('staff.notification') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">notifications</span>
-        <a href="{{ route('staff.notification') }}">Notifikasi</a>
-      </li>
-      <li class="{{ request()->routeIs('staff.history') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">history</span>
-        <a href="{{ route('staff.history') }}">Sejarah Tempahan</a>
-      </li>
-    </ul>
-    <ul class="links bottom-links">
-      <li class="{{ request()->routeIs('staff.profile') ? 'active' : '' }}">
-        <span class="material-symbols-outlined">person</span>
-        <a href="{{ route('staff.profile') }}">Profil</a>
-      </li>
-      <li class="logout-link">
-        <span class="material-symbols-outlined">logout</span>
-        <a href="#">Log Keluar</a>
-      </li>
-    </ul>
-  </aside>
-
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="search-wrap">
-      <input id="globalSearch" class="search-input" type="search" placeholder="@yield('search-placeholder', 'Search site...')" aria-label="Search">
-      <button class="search-btn" type="button" onclick="globalSearch()">🔍</button>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="content">
-    @yield('content')
-  </main>
-
-  <!-- Logout Modal -->
-  <div id="logoutModal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop" tabindex="-1"></div>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
-      <h3 id="logoutTitle">Sahkan Log Keluar</h3>
-      <p>Adakah anda pasti mahu log keluar?</p>
-      <div class="modal-actions">
-        <button id="confirmLogout" class="btn primary">Ya, Log Keluar</button>
-        <button id="cancelLogout" class="btn">Tidak</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Global search function
-    function globalSearch() {
-      const q = document.getElementById('globalSearch').value.trim();
-      if (!q) return;
-      const found = document.querySelectorAll('body *:not(script):not(style)');
-      for (const el of found) {
-        if (el.textContent && el.textContent.toLowerCase().includes(q.toLowerCase())) {
-          el.scrollIntoView({behavior: 'smooth', block: 'center'});
-          el.style.outline = '3px solid #ffea00';
-          setTimeout(() => el.style.outline = '', 3000);
-          return;
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-      }
-      alert('No results on this page.');
-    }
+    </style>
 
-    // Logout modal script
-    (function(){
-      const logoutLink = document.querySelector('.logout-link a');
-      if (!logoutLink) return;
+    @vite(['resources/js/app.js'])
 
-      const modal = document.getElementById('logoutModal');
-      const confirmBtn = document.getElementById('confirmLogout');
-      const cancelBtn = document.getElementById('cancelLogout');
-      const backdrop = modal.querySelector('.modal-backdrop');
+    @stack('styles')
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+    <!-- Toast Notifications -->
+    <x-toast />
 
-      function openModal(href) {
-        modal.dataset.href = href || '';
-        modal.setAttribute('aria-hidden', 'false');
-        confirmBtn.focus();
-      }
+    <!-- Topbar -->
+    <header class="fixed top-0 left-64 right-0 h-16 bg-white shadow-md z-40 flex items-center px-6">
+        <div class="flex-1 max-w-xl">
+            <div class="relative">
+                <input
+                    id="globalSearch"
+                    type="search"
+                    placeholder="@yield('search-placeholder', 'Cari...')"
+                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    aria-label="Search"
+                >
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+            </div>
+        </div>
+    </header>
 
-      function closeModal() {
-        modal.setAttribute('aria-hidden', 'true');
-        delete modal.dataset.href;
-        logoutLink.focus();
-      }
+    <!-- Sidebar -->
+    <aside class="fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white shadow-2xl z-50 flex flex-col">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 p-6 border-b border-gray-700">
+            <img src="{{ asset('IMG/PROTON.png') }}" alt="logo" class="h-10 w-auto" />
+            <h2 class="text-xl font-semibold">Staf</h2>
+        </div>
 
-      logoutLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        openModal(this.getAttribute('href'));
-      });
+        <!-- Main Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3">
+                <li>
+                    <a href="{{ route('staff.dashboard') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('staff.dashboard') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>Laman Utama</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('staff.booking') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('staff.booking') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <span class="material-symbols-outlined">car_rental</span>
+                        <span>Tempahan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('staff.notification') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('staff.notification') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span>Notifikasi</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('staff.history') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('staff.history') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <span class="material-symbols-outlined">history</span>
+                        <span>Sejarah Tempahan</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-      confirmBtn.addEventListener('click', function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route('staff.logout') }}';
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        form.appendChild(csrfToken);
-        document.body.appendChild(form);
-        form.submit();
-      });
+        <!-- Bottom Navigation -->
+        <nav class="border-t border-gray-700 py-4">
+            <ul class="space-y-1 px-3">
+                <li>
+                    <a href="{{ route('staff.profile') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg transition {{ request()->routeIs('staff.profile') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <span class="material-symbols-outlined">person</span>
+                        <span>Profil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#"
+                       onclick="event.preventDefault(); openLogoutModal();"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Log Keluar</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
 
-      cancelBtn.addEventListener('click', closeModal);
-      backdrop.addEventListener('click', closeModal);
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
-      });
-    })();
-  </script>
+    <!-- Logout Form -->
+    <form id="logout-form" action="{{ route('staff.logout') }}" method="POST" class="hidden">
+        @csrf
+    </form>
 
-  @stack('scripts')
+    <!-- Main Content -->
+    <main class="ml-64 mt-16 min-h-screen p-6 bg-cover bg-center bg-fixed relative" style="background-image: url('{{ asset('IMG/BACKGROUNDADTEC.png') }}');">
+        <!-- Overlay for better readability -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-pink-900/40 pointer-events-none"></div>
+        <div class="relative z-10">
+            @yield('content')
+        </div>
+    </main>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeLogoutModal()"></div>
+
+            <!-- Modal panel -->
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <span class="material-symbols-outlined text-red-600">logout</span>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Sahkan Log Keluar
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Adakah anda pasti mahu log keluar?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="confirmLogout()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Ya, Log Keluar
+                    </button>
+                    <button type="button" onclick="closeLogoutModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Echo test listener with toast
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Echo) {
+                window.Echo.channel('test-channel')
+                    .listen('.test-event', (e) => {
+                        console.log('Test event received:', e);
+                        if (typeof showToast === 'function') {
+                            showToast(
+                                'Test Event Received',
+                                e.message || 'WebSocket connection is working!',
+                                'success'
+                            );
+                        }
+                    });
+            }
+        });
+
+        // Global search functionality
+        document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const q = this.value.trim();
+                if (!q) return;
+                const found = document.querySelectorAll('main *:not(script):not(style)');
+                for (const el of found) {
+                    if (el.textContent && el.textContent.toLowerCase().includes(q.toLowerCase())) {
+                        el.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        el.style.outline = '3px solid #ffea00';
+                        setTimeout(() => el.style.outline = '', 3000);
+                        return;
+                    }
+                }
+                alert('Tiada hasil ditemui pada halaman ini.');
+            }
+        });
+
+        // Logout modal functions
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            setTimeout(() => {
+                document.getElementById('logout-form').submit();
+            }, 100);
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLogoutModal();
+            }
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 </html>

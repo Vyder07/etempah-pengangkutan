@@ -3,7 +3,7 @@
 @section('title', 'Notifikasi Admin')
 
 @section('content')
-<main class="ml-[260px] w-full p-6">
+<main class="w-full p-6">
     <div class="bg-white shadow-lg rounded-xl p-6 w-full">
         <h2 class="text-xl font-bold mb-4">Senarai Notifikasi Permohonan</h2>
 
@@ -31,8 +31,8 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        <button 
-                            onclick="openModal({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->user->department ?? 'N/A' }}', '{{ $booking->created_at->format('Y-m-d') }}', '{{ $booking->memo_file ?? '' }}', '{{ addslashes($booking->purpose) }}', '{{ $booking->vehicle_name }}', '{{ $booking->destination }}', '{{ $booking->start_date->format('Y-m-d') }}', '{{ $booking->end_date->format('Y-m-d') }}', '{{ $booking->status }}', this)" 
+                        <button
+                            onclick="openModal({{ $booking->id }}, '{{ $booking->user->name }}', '{{ $booking->user->department ?? 'N/A' }}', '{{ $booking->created_at->format('Y-m-d') }}', '{{ $booking->memo_file ?? '' }}', '{{ addslashes($booking->purpose) }}', '{{ $booking->vehicle_name }}', '{{ $booking->destination }}', '{{ $booking->start_date->format('Y-m-d') }}', '{{ $booking->end_date->format('Y-m-d') }}', '{{ $booking->status }}', this)"
                             class="text-blue-600 hover:text-blue-800 text-xl">
                             👁
                         </button>
@@ -128,12 +128,12 @@
         // Hide action buttons if already approved/rejected/completed/cancelled
         const actionButtons = document.getElementById('actionButtons');
         const statusMessage = document.getElementById('statusMessage');
-        
+
         if (status === 'approved' || status === 'rejected' || status === 'completed' || status === 'cancelled') {
             actionButtons.classList.add('hidden');
             statusMessage.classList.remove('hidden');
             statusMessage.textContent = 'Permohonan ini telah ' + (status === 'approved' ? 'diluluskan' : status === 'rejected' ? 'ditolak' : status === 'completed' ? 'selesai' : 'dibatalkan');
-            statusMessage.className = 'mt-4 text-center font-semibold ' + 
+            statusMessage.className = 'mt-4 text-center font-semibold ' +
                 (status === 'approved' ? 'text-green-600' : status === 'rejected' ? 'text-red-600' : 'text-gray-600');
         } else {
             actionButtons.classList.remove('hidden');

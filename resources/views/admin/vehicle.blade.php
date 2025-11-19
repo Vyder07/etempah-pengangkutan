@@ -3,7 +3,7 @@
 @section('title', 'Pengurusan Dokumen')
 
 @section('content')
-<main class="ml-[260px] w-full p-6">
+<main class="w-full p-6">
     <div class="bg-white rounded-xl shadow-md p-5 mx-auto">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-semibold">Pengurusan Dokumen Tempahan</h1>

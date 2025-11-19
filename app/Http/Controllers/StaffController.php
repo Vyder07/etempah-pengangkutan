@@ -18,7 +18,22 @@ class StaffController extends Controller
     {
         $eventBanners = EventBanner::getActiveBanners();
 
-        return view('staff.dashboard', compact('eventBanners'));
+        // Booking statistics for current user
+        $totalBookings = Booking::where('user_id', Auth::id())->count();
+        $pendingBookings = Booking::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->count();
+        $completedToday = Booking::where('user_id', Auth::id())
+            ->where('status', 'completed')
+            ->whereDate('end_date', Carbon::today())
+            ->count();
+
+        return view('staff.dashboard', compact(
+            'eventBanners',
+            'totalBookings',
+            'pendingBookings',
+            'completedToday'
+        ));
     }
 
     /**
@@ -82,11 +97,23 @@ class StaffController extends Controller
         $user->email = $request->email;
         $user->save();
 
+        // Return JSON for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berjaya dikemaskini',
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ]);
+        }
+
         return redirect()->route('staff.profile')->with('success', 'Profil berjaya dikemaskini');
     }
 
-    /**
-     * Upload profile photo.
+        /**
+     * Upload profile photo
      */
     public function uploadProfilePhoto(Request $request)
     {
@@ -97,19 +124,18 @@ class StaffController extends Controller
         $user = Auth::user();
 
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
-            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
+            // Clear existing profile photo (Spatie will handle deletion)
+            $user->clearMediaCollection('profile_photo');
 
-            // Store new photo
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
-            $user->profile_photo = $path;
-            $user->save();
+            // Add new profile photo to media library
+            $media = $user->addMediaFromRequest('profile_photo')
+                ->usingFileName(time() . '_profile.' . $request->file('profile_photo')->extension())
+                ->toMediaCollection('profile_photo');
 
             return response()->json([
                 'success' => true,
-                'photo_url' => Storage::url($path),
+                'photo_url' => $user->getFirstMediaUrl('profile_photo', 'profile'),
+                'message' => 'Gambar profil berjaya dikemas kini',
             ]);
         }
 
