@@ -71,18 +71,20 @@ class AuthController extends Controller
     {
         // Validate input
         $request->validate([
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'nullable|in:admin,staff'
         ]);
 
+        $name = $request->input('name');
         $email = $request->input('email');
         $password = $request->input('password');
         $role = $request->input('role') ?? 'staff';
 
         // Simpan user baru
         DB::table('users')->insert([
-            'name' => explode('@', $email)[0],
+            'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
             'role' => $role,
@@ -92,7 +94,7 @@ class AuthController extends Controller
         ]);
 
         return redirect()->route($role === 'admin' ? 'admin.auth.login' : 'staff.auth.login')
-            ->with('success', 'Akaun berjaya didaftarkan. Sila log masuk.');
+            ->with('success', 'Akaun berjaya didaftarkan! Sila log masuk dengan email dan kata laluan anda.');
     }
 
     /**

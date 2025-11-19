@@ -13,6 +13,7 @@ class Booking extends Model implements HasMedia
 
     protected $fillable = [
         'user_id',
+        'vehicle_type',
         'vehicle_name',
         'vehicle_plate',
         'purpose',

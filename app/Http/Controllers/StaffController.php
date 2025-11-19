@@ -49,6 +49,90 @@ class StaffController extends Controller
     }
 
     /**
+     * Store a new booking.
+     */
+    public function storeBooking(Request $request)
+    {
+        $request->validate([
+            'vehicle_type' => 'required|in:car,van,bus',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
+            'vehicle_name' => 'required|string|max:255',
+            'vehicle_plate' => 'required|string|max:20',
+            'destination' => 'required|string|max:255',
+            'purpose' => 'required|string|max:1000',
+        ]);
+
+        $booking = Booking::create([
+            'user_id' => Auth::id(),
+            'vehicle_type' => $request->vehicle_type,
+            'vehicle_name' => $request->vehicle_name,
+            'vehicle_plate' => $request->vehicle_plate,
+            'destination' => $request->destination,
+            'purpose' => $request->purpose,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'status' => 'pending',
+        ]);
+
+        // Broadcast notification to admin via WebSocket
+        broadcast(new \App\Events\BookingCreated($booking))->toOthers();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tempahan berjaya dihantar. Sila tunggu kelulusan admin.',
+            'booking' => $booking,
+        ]);
+    }
+
+    /**
+     * Update an existing booking.
+     */
+    public function updateBooking(Request $request, $id)
+    {
+        $booking = Booking::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Only allow editing pending bookings
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya tempahan yang masih menunggu kelulusan boleh diubah.',
+            ], 403);
+        }
+
+        $request->validate([
+            'vehicle_type' => 'required|in:car,van,bus',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
+            'vehicle_name' => 'required|string|max:255',
+            'vehicle_plate' => 'required|string|max:20',
+            'destination' => 'required|string|max:255',
+            'purpose' => 'required|string|max:1000',
+        ]);
+
+        $booking->update([
+            'vehicle_type' => $request->vehicle_type,
+            'vehicle_name' => $request->vehicle_name,
+            'vehicle_plate' => $request->vehicle_plate,
+            'destination' => $request->destination,
+            'purpose' => $request->purpose,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
+
+        // Broadcast notification to admin via WebSocket
+        broadcast(new \App\Events\BookingUpdated($booking))->toOthers();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tempahan berjaya dikemaskini.',
+            'booking' => $booking,
+        ]);
+    }
+
+    /**
      * Display the notification page.
      */
     public function notification()

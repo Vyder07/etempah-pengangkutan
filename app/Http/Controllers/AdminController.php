@@ -306,6 +306,9 @@ class AdminController extends Controller
         }
         $booking->save();
 
+        // Broadcast notification to staff via WebSocket
+        broadcast(new \App\Events\BookingUpdated($booking))->toOthers();
+
         return response()->json([
             'success' => true,
             'message' => 'Status tempahan berjaya dikemas kini',

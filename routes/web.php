@@ -45,6 +45,16 @@ Route::middleware(['guest'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', function() {
+        $user = Auth::user();
+
+        // Redirect based on user role
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+
+        // Fallback to welcome page if role is not set
         return view('welcome');
     });
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -93,6 +103,8 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
         ->group(function () {
             Route::get('/dashboard', 'dashboard')->name('dashboard');
             Route::get('/booking', 'booking')->name('booking');
+            Route::post('/booking', 'storeBooking')->name('booking.store');
+            Route::put('/booking/{id}', 'updateBooking')->name('booking.update');
             Route::get('/notification', 'notification')->name('notification');
             Route::get('/history', 'history')->name('history');
             Route::get('/profile', 'profile')->name('profile');

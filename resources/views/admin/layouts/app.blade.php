@@ -163,9 +163,45 @@
 
     <!-- Scripts -->
     <script>
-        // Echo test listener with toast
+        // Echo WebSocket listeners for admin
         document.addEventListener('DOMContentLoaded', function() {
             if (window.Echo) {
+                // Listen for new and updated bookings on admin-notifications channel
+                window.Echo.channel('admin-notifications')
+                    .listen('.booking.created', (e) => {
+                        console.log('New booking notification for admin:', e);
+                        if (typeof showToast === 'function') {
+                            showToast(
+                                'Tempahan Baharu!',
+                                `${e.user.name} telah membuat tempahan ${e.vehicle_name} (${e.vehicle_type})`,
+                                'success'
+                            );
+                        }
+
+                        // Play notification sound (optional)
+                        // new Audio('/sounds/notification.mp3').play();
+                    })
+                    .listen('.booking.updated', (e) => {
+                        console.log('Booking updated by staff:', e);
+                        if (typeof showToast === 'function') {
+                            showToast(
+                                'Tempahan Dikemaskini!',
+                                `${e.user.name} telah mengemaskini tempahan ${e.vehicle_name}`,
+                                'success'
+                            );
+                        }
+                    });
+
+                // Also listen on bookings channel for general updates
+                window.Echo.channel('bookings')
+                    .listen('.booking.created', (e) => {
+                        console.log('Booking created on bookings channel:', e);
+                    })
+                    .listen('.booking.updated', (e) => {
+                        console.log('Booking updated on bookings channel:', e);
+                    });
+
+                // Test channel for debugging
                 window.Echo.channel('test-channel')
                     .listen('.test-event', (e) => {
                         console.log('Test event received:', e);
@@ -177,6 +213,10 @@
                             );
                         }
                     });
+
+                console.log('Echo listeners initialized for admin');
+            } else {
+                console.warn('Echo is not available. WebSocket notifications disabled.');
             }
         });
 

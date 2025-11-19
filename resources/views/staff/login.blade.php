@@ -93,6 +93,44 @@
       text-decoration: none;
     }
 
+    /* Error message styling */
+    .error-message {
+      background-color: rgba(239, 68, 68, 0.9);
+      color: white;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      text-align: left;
+      border-left: 4px solid #dc2626;
+    }
+
+    .error-message ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .error-message li {
+      margin: 5px 0;
+    }
+
+    .success-message {
+      background-color: rgba(16, 185, 129, 0.9);
+      color: white;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      text-align: center;
+      border-left: 4px solid #059669;
+    }
+
+    /* Input error state */
+    .login-box input.error {
+      border-color: #ef4444;
+      background-color: #fee;
+    }
+
     .topbar {
       position: fixed;
       left: 110px;
@@ -154,10 +192,33 @@
     <div class="login-box">
       <h2>Log Masuk Staff</h2>
 
+      @if($errors->any())
+        <div class="error-message">
+          <strong>Ralat!</strong>
+          <ul>
+            @foreach($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+      @if(session('success'))
+        <div class="success-message">
+          {{ session('success') }}
+        </div>
+      @endif
+
+      @if(session('error'))
+        <div class="error-message">
+          {{ session('error') }}
+        </div>
+      @endif
+
       <form id="login-form" action="{{ route('staff.auth.login') }}" method="POST">
         @csrf
-        <input type="email" name="email" placeholder="Email Address" required />
-        <input type="password" name="password" placeholder="Password" required />
+        <input type="email" name="email" placeholder="Email Address" value="{{ old('email') }}" required class="{{ $errors->has('email') ? 'error' : '' }}" />
+        <input type="password" name="password" placeholder="Password" required class="{{ $errors->has('password') ? 'error' : '' }}" />
 
         <div class="options">
           <label>
