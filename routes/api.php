@@ -13,11 +13,8 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-// LOGIN
-Route::post('/login', [AuthController::class, 'login']);
-
-// REGISTER
-Route::post('/register', [AuthController::class, 'register']);
+// Note: Login and Register routes moved to web.php for session support
+// Use /staff/login or /admin/login instead of /api/login
 
 // ACTIVATE
 Route::get('/activate/{token}', [AuthController::class, 'activate']);
