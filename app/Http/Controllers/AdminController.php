@@ -403,6 +403,27 @@ class AdminController extends Controller
     }
 
     /**
+     * Delete a booking from notification page
+     */
+    public function deleteNotification($id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            $booking->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Permohonan berjaya dipadam'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memadam permohonan'
+            ], 500);
+        }
+    }
+
+    /**
      * Display the admin profile page.
      */
     public function profile()

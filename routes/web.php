@@ -111,6 +111,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
             // Notification routes
             Route::put('/notifications/{id}/status', 'updateNotificationStatus')->name('notifications.updateStatus');
+            Route::delete('/notifications/{id}', 'deleteNotification')->name('notifications.delete');
         });
 });
 

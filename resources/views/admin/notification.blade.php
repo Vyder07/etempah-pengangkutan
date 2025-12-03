@@ -14,6 +14,7 @@
                     <th class="py-2 text-left">Status</th>
                     <th class="py-2 text-center">Tindakan</th>
                     <th class="py-2 text-left">Tarikh Permohonan</th>
+                    <th class="py-2 text-center">Padam</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,10 +39,18 @@
                         </button>
                     </td>
                     <td>{{ $booking->created_at->format('d/m/Y') }}</td>
+                    <td class="text-center">
+                        <button
+                            onclick="deleteBooking({{ $booking->id }}, this)"
+                            class="text-red-600 hover:text-red-800 text-xl"
+                            title="Padam">
+                            🗑️
+                        </button>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="text-center py-8 text-gray-500">
+                    <td colspan="5" class="text-center py-8 text-gray-500">
                         Tiada notifikasi permohonan
                     </td>
                 </tr>
@@ -185,6 +194,53 @@
                 }, 1500);
             } else {
                 alert('Ralat: ' + (data.message || 'Gagal mengemaskini status'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ralat sambungan. Sila cuba lagi.');
+        }
+    }
+
+    async function deleteBooking(bookingId, btn) {
+        if (!confirm('Adakah anda pasti untuk memadam permohonan ini? Tindakan ini tidak boleh dibatalkan.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/notifications/${bookingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Remove the row from the table with animation
+                const row = btn.closest('tr');
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => {
+                    row.remove();
+
+                    // Check if table is empty
+                    const tbody = document.querySelector('table tbody');
+                    if (tbody.children.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-gray-500">
+                                    Tiada notifikasi permohonan
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }, 300);
+
+                alert('Permohonan berjaya dipadam.');
+            } else {
+                alert('Ralat: ' + (data.message || 'Gagal memadam permohonan'));
             }
         } catch (error) {
             console.error('Error:', error);
