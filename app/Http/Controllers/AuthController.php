@@ -184,10 +184,15 @@ class AuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['success' => true, 'message' => __($status)]);
+            // Determine redirect based on user role
+            $user = User::where('email', $request->email)->first();
+            $loginRoute = ($user && $user->role === 'staff') ? 'staff.auth.login' : 'admin.auth.login';
+
+            return redirect()->route($loginRoute)
+                ->with('success', 'Kata laluan berjaya ditetapkan semula. Sila log masuk.');
         }
 
-        return response()->json(['success' => false, 'message' => __($status)], 500);
+        return back()->withErrors(['email' => __($status)]);
     }
 
     public function showStaffLoginForm()
@@ -203,6 +208,26 @@ class AuthController extends Controller
     public function showStaffForgotPasswordForm()
     {
         return view('staff.forgot');
+    }
+
+    public function showStaffResetForm(Request $request, $token)
+    {
+        return view('staff.reset', [
+            'token' => $token,
+            'email' => $request->email,
+        ]);
+    }
+
+    /**
+     * Show the default password reset form (redirects based on email)
+     */
+    public function showResetForm(Request $request, $token)
+    {
+        // Default to admin reset form, but can be customized
+        return view('admin.auth.reset', [
+            'token' => $token,
+            'email' => $request->email,
+        ]);
     }
 
     public function showLoginOptions()

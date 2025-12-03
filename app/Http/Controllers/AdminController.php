@@ -505,6 +505,17 @@ class AdminController extends Controller
         return view('admin.auth.forgot');
     }
 
+    /**
+     * Display the reset password form.
+     */
+    public function showResetPasswordForm(Request $request, $token)
+    {
+        return view('admin.auth.reset', [
+            'token' => $token,
+            'email' => $request->email,
+        ]);
+    }
+
         /**
      * Get booking attachments as JSON for the vehicle/documents page
      */

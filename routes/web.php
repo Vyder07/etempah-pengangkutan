@@ -13,6 +13,9 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/password/email', [AuthController::class, 'sendResetLink']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 
+    // Default password reset route (required by Laravel's Password::sendResetLink)
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+
     Route::controller(AuthController::class)
     ->prefix('staff')
     ->name('staff.')
@@ -23,6 +26,8 @@ Route::middleware(['guest'])->group(function () {
         Route::post('/register', 'register')->name('register.submit');
         Route::get('/forgot-password', 'showStaffForgotPasswordForm')->name('forgot');
         Route::post('/forgot-password', 'sendResetLink')->name('forgot.submit');
+        Route::get('/reset-password/{token}', 'showStaffResetForm')->name('reset');
+        Route::post('/reset-password', 'resetPassword')->name('reset.submit');
         Route::get('/verify/{token}', 'verifyEmail')->name('verify.email');
         Route::post('/resend-verification', 'resendVerification')->name('resend.verification');
     });
@@ -34,6 +39,7 @@ Route::middleware(['guest'])->group(function () {
             Route::get('/login', 'showLoginForm')->name('auth.login');
             Route::get('/register', 'showRegistrationForm')->name('auth.register');
             Route::get('/forgot-password', 'showForgotPasswordForm')->name('auth.forgot');
+            Route::get('/reset-password/{token}', 'showResetPasswordForm')->name('auth.reset');
         });
 
     Route::controller(AuthController::class)
@@ -43,6 +49,7 @@ Route::middleware(['guest'])->group(function () {
             Route::post('/login', 'login')->name('auth.login.submit');
             Route::post('/register', 'register')->name('auth.register.submit');
             Route::post('/forgot-password', 'sendResetLink')->name('auth.forgot.submit');
+            Route::post('/reset-password', 'resetPassword')->name('auth.reset.submit');
             Route::get('/verify/{token}', 'verifyEmail')->name('verify.email');
             Route::post('/resend-verification', 'resendVerification')->name('resend.verification');
         });
