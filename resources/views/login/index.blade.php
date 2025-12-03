@@ -60,10 +60,9 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
-        .option img {
-            width: 110px;
-            height: 90px;
-            filter: brightness(0) invert(1);
+        .option svg {
+            width: 80px;
+            height: 80px;
         }
 
         .option p {
@@ -113,11 +112,19 @@
         <h2>PILIH JENIS AKAUN</h2>
         <div class="account-options">
             <div class="option" id="admin">
-                <img src="{{ asset('login/Images/Admin Support.png') }}" alt="Admin Icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="80" height="80">
+                    <path d="M12 2C9.24 2 7 4.24 7 7s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/>
+                    <path d="M12 13c-4.42 0-8 2.69-8 6v2h16v-2c0-3.31-3.58-6-8-6zm6 6H6v-.5c0-2.03 2.64-4.5 6-4.5s6 2.47 6 4.5v.5z"/>
+                    <path d="M17 8h4v2h-4zm0-3h4v2h-4zm0 6h4v2h-4z"/>
+                </svg>
                 <p>ADMIN</p>
             </div>
             <div class="option" id="staff">
-                <img src="{{ asset('login/Images/Staff Concept.png') }}" alt="Staff Icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="80" height="80">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
+                    <path d="M12 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4zm6 5H6v-1c0-.37.53-1.14 1.84-1.81C9.16 14.54 10.71 14 12 14s2.84.54 4.16 1.19C17.47 15.86 18 16.63 18 17v1z"/>
+                    <path d="M19 8h-2v3h-3v2h3v3h2v-3h3v-2h-3z"/>
+                </svg>
                 <p>STAFF</p>
             </div>
         </div>
